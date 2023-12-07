@@ -11,8 +11,6 @@ services:
     restart: always
     depends_on:
       - nginx
-    env_file:
-      - backend/.env
     environment:
       PORT: 9000
       LOG_LEVEL: "debug"

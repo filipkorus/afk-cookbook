@@ -5,7 +5,7 @@ const domain = window.location.origin;
 const getApiUrl = (): string => {
 	if (production) return `${domain}/api/`;
 
-	if (!production && domain === 'http://localhost:3001') return 'http://localhost:9000/';
+	if (!production && domain === 'http://localhost:5173') return 'http://localhost:9000/';
 
 	// backend API -> 'http://localhost:9000/'
 	// backend API from docker container -> 'http://localhost:7777/api/'
