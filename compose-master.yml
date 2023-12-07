@@ -1,6 +1,26 @@
 version: '3.4'
 
 services:
+  nginx:
+    build: nginx
+    restart: always
+    ports:
+      - "7777:80"
+  mysql:
+    image: mariadb
+    restart: always
+    depends_on:
+      - nginx
+    volumes:
+      - './database:/var/lib/mysql'
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    depends_on:
+      - nginx
+      - mysql
+    environment:
+      PMA_HOST: mysql
   frontend:
     build: frontend
     restart: always
@@ -11,13 +31,9 @@ services:
     restart: always
     depends_on:
       - nginx
+      - mysql
     environment:
       PORT: 9000
       LOG_LEVEL: "debug"
       ALLOWED_ORIGINS: "https://afk-cookbook.fkor.us"
       OAUTH_GOOGLE_CLIENT_ID: "325396365340-a0ufpksrnsmigrpko21ah2to0n3p6uv9.apps.googleusercontent.com"
-  nginx:
-    build: nginx
-    restart: always
-    ports:
-      - "7777:80"
