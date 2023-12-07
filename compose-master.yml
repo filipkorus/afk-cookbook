@@ -16,7 +16,7 @@ services:
     environment:
       PORT: 9000
       LOG_LEVEL: "debug"
-      ALLOWED_ORIGINS: "https://afk-cookbook.fkor.us;http://localhost:7777;http://localhost:3001"
+      ALLOWED_ORIGINS: "https://afk-cookbook.fkor.us"
       OAUTH_GOOGLE_CLIENT_ID: "325396365340-a0ufpksrnsmigrpko21ah2to0n3p6uv9.apps.googleusercontent.com"
   nginx:
     build: nginx
