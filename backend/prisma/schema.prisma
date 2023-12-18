@@ -36,16 +36,16 @@ model Settings {
 }
 
 model Recipe {
-  id                 Int                  @id @default(autoincrement())
-  title              String               @db.VarChar(255)
+  id                 Int                @id @default(autoincrement())
+  title              String             @db.VarChar(255)
   cookingTimeMinutes Int
-  description        String               @db.Text
-  isPublic           Boolean              @default(false)
-  createdAt          DateTime             @default(now())
-  user               User                 @relation(fields: [userId], references: [id])
+  description        String             @db.Text
+  isPublic           Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  user               User               @relation(fields: [userId], references: [id])
   userId             Int
   RecipeReview       RecipeReview[]
-  IngredientOnRecipe IngredientOnRecipe[]
+  RecipeIngredient   RecipeIngredient[]
   RecipeCategory     RecipeCategory[]
 }
 
@@ -61,12 +61,12 @@ model RecipeReview {
 }
 
 model Ingredient {
-  id                 Int                  @id @default(autoincrement())
-  name               String               @db.VarChar(255)
-  IngredientOnRecipe IngredientOnRecipe[]
+  id               Int                @id @default(autoincrement())
+  name             String             @db.VarChar(255)
+  RecipeIngredient RecipeIngredient[]
 }
 
-model IngredientOnRecipe {
+model RecipeIngredient {
   recipe       Recipe     @relation(fields: [recipeId], references: [id])
   recipeId     Int
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
