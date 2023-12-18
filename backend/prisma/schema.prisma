@@ -16,6 +16,8 @@ model User {
   banned       Boolean        @default(false)
   joinedAt     DateTime       @default(now())
   RefreshToken RefreshToken[]
+  Recipe       Recipe[]
+  RecipeReview RecipeReview[]
 }
 
 model RefreshToken {
@@ -31,4 +33,59 @@ model Settings {
   id    Int    @id @default(autoincrement())
   key   String @unique @db.VarChar(255)
   value String @db.VarChar(255)
+}
+
+model Recipe {
+  id                 Int                  @id @default(autoincrement())
+  title              String               @db.VarChar(255)
+  cookingTimeMinutes Int
+  description        String               @db.Text
+  isPublic           Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  user               User                 @relation(fields: [userId], references: [id])
+  userId             Int
+  RecipeReview       RecipeReview[]
+  IngredientOnRecipe IngredientOnRecipe[]
+  RecipeCategory     RecipeCategory[]
+}
+
+model RecipeReview {
+  id         Int      @id @default(autoincrement())
+  isPositive Boolean
+  comment    String?  @db.Text
+  Recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId   Int
+  User       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  createdAt  DateTime @default(now())
+}
+
+model Ingredient {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(255)
+  IngredientOnRecipe IngredientOnRecipe[]
+}
+
+model IngredientOnRecipe {
+  recipe       Recipe     @relation(fields: [recipeId], references: [id])
+  recipeId     Int
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId Int
+
+  @@id([recipeId, ingredientId])
+}
+
+model Category {
+  id             Int              @id @default(autoincrement())
+  name           String           @db.VarChar(255)
+  RecipeCategory RecipeCategory[]
+}
+
+model RecipeCategory {
+  recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId   Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  @@id([recipeId, categoryId])
 }
