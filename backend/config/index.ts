@@ -2,6 +2,7 @@ import 'dotenv/config';
 import checkObjectValuesNotNull from '../src/utils/checkObjectValuesNotNull';
 
 const config = {
+	PRODUCTION: false,
 	PORT: process.env.PORT ?? 5001,
 	ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS?.split(';') ?? [],
 	LOGGER: {
@@ -21,7 +22,11 @@ const config = {
 		REFRESH_TOKEN: {
 			SECRET: 'fsd731b_2n3tsdds83_2jsdkmvtqgeyqg',
 			EXPIRES_IN_DAYS: 7
-		}
+		},
+	},
+	TEST: {
+		USER_ID: 1,
+		ACCESS_TOKEN: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 	}
 } as const;
 

@@ -9,23 +9,29 @@ import {
 	ACCOUNT_BANNED,
 	ACCOUNT_CREATED,
 	BAD_REQUEST,
-	INVALID_LOGIN_CREDENTIALS, SERVER_ERROR,
+	INVALID_LOGIN_CREDENTIALS, MISSING_BODY_FIELDS, SERVER_ERROR,
 	SUCCESS, UNAUTHORIZED
 } from '../../utils/httpCodeResponses/messages';
 import {createUser, emailExists, getUserByEmail, updateNameAndPicture} from '../user/user.service';
 import config from '../../../config';
 import {Request, Response} from 'express';
+import {z} from 'zod';
+import validateObject from '../../utils/validateObject';
 
 export const LoginHandler = async (req: Request, res: Response) => {
 	await deleteExpiredRefreshTokens();
 
-	const {credential} = req.body;
+	const RequestSchema = z.object({
+		credential: z.string().length(137, {message: 'credential must be 137 characters long'})
+	});
 
-	if (!credential) {
-		return BAD_REQUEST(res);
+	const validatedRequest = validateObject(RequestSchema, req.body);
+
+	if (validatedRequest.data == null) {
+		return MISSING_BODY_FIELDS(res, validatedRequest.errors);
 	}
 
-	const profile = await verifyGoogleToken(credential);
+	const profile = await verifyGoogleToken(validatedRequest.data.credential);
 	if (profile == null) {
 		return INVALID_LOGIN_CREDENTIALS(res);
 	}
