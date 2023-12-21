@@ -12,14 +12,11 @@ import {getUserById} from '../user/user.service';
 
 const prisma = new PrismaClient();
 
-type Ingredients = Array<string>;
-type Categories = Array<string>;
-
 type RecipeToAdd =
 	Omit<Recipe, 'id' | 'createdAt'>
 	& {
-	ingredients: Ingredients,
-	categories: Categories
+	ingredients: Array<string>,
+	categories: Array<string>
 };
 
 type FullRecipeObject = Recipe & {
@@ -192,42 +189,48 @@ export const getRecipeFullObjectById = async (recipeId: number): Promise<FullRec
 	}
 };
 
-type RecipeIngredientWithIngredient = RecipeIngredient & { ingredient: Ingredient };
+type IngredientWithIngredientField = { ingredient: Ingredient };
 /**
- * Returns list of RecipeIngredient objects or null if error.
+ * Returns list of {ingredient: Ingredient} objects or null if error.
  *
- * @returns {PrismaPromise<Array<RecipeIngredientWithIngredient>> | null} List of RecipeIngredient objects with Ingredient object inside or null if error.
+ * @returns {PrismaPromise<Array<IngredientWithIngredientField>> | null} List of {ingredient: Ingredient} objects or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeIngredientsByRecipeId = (recipeId: number): PrismaPromise<Array<RecipeIngredientWithIngredient>> | null => {
+export const getRecipeIngredientsByRecipeId = (recipeId: number): PrismaPromise<Array<IngredientWithIngredientField>> | null => {
 	try {
-		return prisma.recipeIngredient.findMany({where: {recipeId}, include: {ingredient: true}})
+		return prisma.recipeIngredient.findMany({
+			where: {recipeId},
+			select: {ingredient: true, ingredientId: false, recipeId: false}
+		});
 	} catch (error) {
 		logger.error(error);
 		return null;
 	}
 };
 
-const shapeIngredientsArray = (recipeIngredientsWithIngredient: Array<RecipeIngredientWithIngredient>) => {
+const shapeIngredientsArray = (recipeIngredientsWithIngredient: Array<IngredientWithIngredientField>) => {
 	return recipeIngredientsWithIngredient.map(recipeIngredient => recipeIngredient.ingredient);
 };
 
-type RecipeCategoryWithCategory = RecipeCategory & { category: Category };
+type CategoryWithCategoryField = { category: Category };
 /**
- * Returns list of RecipeCategory objects or null if error.
+ * Returns list of {category: Category} objects or null if error.
  *
- * @returns {PrismaPromise<Array<RecipeCategoryWithCategory>> | null} List of RecipeCategory objects with Category object inside or null if error.
+ * @returns {PrismaPromise<Array<CategoryWithCategoryField>> | null} List of {category: Category} objects or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeCategoriesByRecipeId = (recipeId: number): PrismaPromise<Array<RecipeCategoryWithCategory>> | null => {
+export const getRecipeCategoriesByRecipeId = (recipeId: number): PrismaPromise<Array<CategoryWithCategoryField>> | null | any => {
 	try {
-		return prisma.recipeCategory.findMany({where: {recipeId}, include: {category: true}})
+		return prisma.recipeCategory.findMany({
+			where: {recipeId},
+			select: {category: true, categoryId: false, recipeId: false}
+		});
 	} catch (error) {
 		logger.error(error);
 		return null;
 	}
 };
 
-const shapeCategoriesArray = (recipeCategoriesWithCategory: Array<RecipeCategoryWithCategory>) => {
+const shapeCategoriesArray = (recipeCategoriesWithCategory: Array<CategoryWithCategoryField>) => {
 	return recipeCategoriesWithCategory.map(recipeCategory => recipeCategory.category);
 };
