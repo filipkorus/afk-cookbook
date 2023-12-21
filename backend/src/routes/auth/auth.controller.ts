@@ -22,7 +22,7 @@ export const LoginHandler = async (req: Request, res: Response) => {
 	await deleteExpiredRefreshTokens();
 
 	const RequestSchema = z.object({
-		credential: z.string().length(137, {message: 'credential must be 137 characters long'})
+		credential: z.string({required_error: 'credential field does not exist'})
 	});
 
 	const validatedRequest = validateObject(RequestSchema, req.body);
