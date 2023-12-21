@@ -25,7 +25,7 @@ model RefreshToken {
   token     String   @unique @db.VarChar(150)
   expiresAt DateTime
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
 }
 
@@ -45,7 +45,7 @@ model Recipe {
   location           String?            @db.VarChar(255)
   latitude           Float?
   longitude          Float?
-  user               User               @relation(fields: [userId], references: [id])
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId             Int
   RecipeReview       RecipeReview[]
   RecipeIngredient   RecipeIngredient[]
@@ -56,7 +56,7 @@ model RecipeReview {
   id         Int      @id @default(autoincrement())
   isPositive Boolean
   comment    String?  @db.Text
-  Recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  Recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId   Int
   User       User     @relation(fields: [userId], references: [id])
   userId     Int
@@ -65,12 +65,12 @@ model RecipeReview {
 
 model Ingredient {
   id               Int                @id @default(autoincrement())
-  name             String             @db.VarChar(255)
+  name             String             @unique @db.VarChar(100)
   RecipeIngredient RecipeIngredient[]
 }
 
 model RecipeIngredient {
-  recipe       Recipe     @relation(fields: [recipeId], references: [id])
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId     Int
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
   ingredientId Int
@@ -80,12 +80,12 @@ model RecipeIngredient {
 
 model Category {
   id             Int              @id @default(autoincrement())
-  name           String           @db.VarChar(255)
+  name           String           @unique @db.VarChar(100)
   RecipeCategory RecipeCategory[]
 }
 
 model RecipeCategory {
-  recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId   Int
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId Int

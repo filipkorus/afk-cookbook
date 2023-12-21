@@ -49,12 +49,12 @@ export const createUser = async ({name, picture, email}: {
 /**
  * Returns user object with given user ID.
  *
- * @returns {Promise<User|null>} User object or null if error.
+ * @returns {Promise<User|null>|null} User object or null if error.
  * @param userId {number} User's ID.
  */
-export const getUserById = async (userId: number): Promise<User | null> => {
+export const getUserById = (userId: number): Promise<User | null> | null => {
 	try {
-		return await prisma.user.findFirst({where: {id: userId}});
+		return prisma.user.findFirst({where: {id: userId}});
 	} catch (error) {
 		logger.error(error);
 		return null;
