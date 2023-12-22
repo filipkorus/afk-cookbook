@@ -46,7 +46,7 @@ const RecipeCard: React.FC<RecipeProps> = ({}) => {
 	return <Card>
 		<CardHeader
 			avatar={<Avatar aria-label="User" alt={recipe.author.name} src={recipe.author.picture}/>}
-			title={`${recipe.author.name} | ${timeSince(recipe.createdAt)} ago`}
+			title={`${recipe.author.name} | ${timeSince(recipe.createdAt)}`}
 			subheader={recipe.location ?? ''}
 		/>
 		<CardContent>
