@@ -12,12 +12,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({...rest}) => {
 	return <Button
 		variant="contained"
 		onClick={() => {
-			handleLogout()
-				.then(({success, error}) => {
-					if (error) return alert(error);
 
-					navigate('/login?loggedOut=true');
-				})
 		}}
 		{...rest}
 	>

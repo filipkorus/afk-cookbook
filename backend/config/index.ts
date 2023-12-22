@@ -2,7 +2,7 @@ import 'dotenv/config';
 import checkObjectValuesNotNull from '../src/utils/checkObjectValuesNotNull';
 
 const config = {
-	PRODUCTION: false,
+	PRODUCTION: process.env.PRODUCTION === 'true' ?? true,
 	PORT: process.env.PORT ?? 5001,
 	ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS?.split(';') ?? [],
 	LOGGER: {

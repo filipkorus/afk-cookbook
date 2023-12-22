@@ -1,10 +1,16 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import {Navigate, Outlet, useLocation, useNavigate} from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext.tsx';
 
 const PrivateRoute = () => {
 	const { currentUser } = useAuth();
 
-	return currentUser ? <Outlet /> : <Navigate to="/login?kickedOut=true" />;
+	const location = useLocation();
+	const query = new URLSearchParams(location.search);
+
+	query.set('from', location.pathname); // we can redirect user back when he is authenticated again
+
+	// ?kickedOut=true
+	return currentUser ? <Outlet /> : <Navigate to={`/login?${query.toString()}`} />;
 }
 
 export default PrivateRoute;

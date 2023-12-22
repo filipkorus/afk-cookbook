@@ -12,17 +12,15 @@ import {getUserById} from '../user/user.service';
 
 const prisma = new PrismaClient();
 
-type Ingredients = Array<string>;
-type Categories = Array<string>;
-
 type RecipeToAdd =
 	Omit<Recipe, 'id' | 'createdAt'>
 	& {
-	ingredients: Ingredients,
-	categories: Categories
+	ingredients: Array<string>,
+	categories: Array<string>
 };
 
-type FullRecipeObject = Recipe & {
+type RecipeWithoutCoords = Omit<Recipe, 'latitude' | 'longitude'>;
+type FullRecipeObject = RecipeWithoutCoords & {
 	ingredients: Array<Ingredient>,
 	categories: Array<Category>,
 	author?: Omit<User, 'email' | 'banned'>
@@ -105,12 +103,24 @@ export const createRecipe = async (recipe: RecipeToAdd): Promise<FullRecipeObjec
 /**
  * Returns Recipe object with given recipe's ID.
  *
- * @returns {Promise<Recipe|null>|null} Recipe object or null if error.
+ * @returns {Promise<RecipeWithoutCoords|null>|null} RecipeWithoutCoords object or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeById = (recipeId: number): Promise<Recipe | null> | null => {
+export const getRecipeById = (recipeId: number): Promise<RecipeWithoutCoords | null> | null => {
 	try {
-		return prisma.recipe.findFirst({where: {id: recipeId}});
+		return prisma.recipe.findFirst({
+			where: {id: recipeId},
+			select: {
+				id: true,
+				title: true,
+				cookingTimeMinutes: true,
+				description: true,
+				isPublic: true,
+				createdAt: true,
+				location: true,
+				userId: true
+			}
+		});
 	} catch (error) {
 		logger.error(error);
 		return null;
@@ -122,17 +132,45 @@ export const getRecipeById = (recipeId: number): Promise<Recipe | null> | null =
  *
  * @param startIndex {number} Pagination parameter.
  * @param limit {number} Pagination parameter.
- * @returns {Promise<Array<Recipe>> | null} Array of Recipe objects or null if error.
+ * @param currentLoggedUserId {number} User ID of currently logged user.
+ * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
+ * @returns  Array of RecipeWithoutCoords objects or null if error.
  */
-export const getRecipesAll = ({startIndex, limit}: {
+export const getRecipesAllWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
 	startIndex?: number,
-	limit?: number
-} = {}): Promise<Array<Recipe>> | null => {
+	limit?: number,
+	currentLoggedUserId: number,
+	doNotIncludeOwnRecipes?: boolean
+}) => {
 	try {
 		return prisma.recipe.findMany({
+			where: {
+				AND: [
+					{userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}},
+					{
+						OR: [
+							{isPublic: true},
+							{userId: currentLoggedUserId}
+						]
+					}
+				]
+			},
 			orderBy: {createdAt: 'desc'},
 			skip: startIndex,
-			take: limit
+			take: limit,
+			select: {
+				user: {
+					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
+				},
+				id: true,
+				title: true,
+				cookingTimeMinutes: true,
+				description: true,
+				isPublic: true,
+				createdAt: true,
+				location: true,
+				userId: true
+			}
 		});
 	} catch (error) {
 		logger.error(error);
@@ -143,11 +181,28 @@ export const getRecipesAll = ({startIndex, limit}: {
 /**
  * Returns number of recipes in the database.
  *
+ * @param currentLoggedUserId {number} User ID of currently logged user.
+ * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
  * @returns {Promise<number> | null} Number of recipes in the database.
  */
-export const getRecipesCount = (): Promise<number> | null => {
+export const getRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
+	currentLoggedUserId: number,
+	doNotIncludeOwnRecipes?: boolean
+}): Promise<number> | null => {
 	try {
-		return prisma.recipe.count();
+		return prisma.recipe.count({
+			where: {
+				AND: [
+					{userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}},
+					{
+						OR: [
+							{isPublic: true},
+							{userId: currentLoggedUserId}
+						]
+					}
+				]
+			},
+		});
 	} catch (error) {
 		logger.error(error);
 		return null;
@@ -192,42 +247,48 @@ export const getRecipeFullObjectById = async (recipeId: number): Promise<FullRec
 	}
 };
 
-type RecipeIngredientWithIngredient = RecipeIngredient & { ingredient: Ingredient };
+type IngredientWithIngredientField = { ingredient: Ingredient };
 /**
- * Returns list of RecipeIngredient objects or null if error.
+ * Returns list of {ingredient: Ingredient} objects or null if error.
  *
- * @returns {PrismaPromise<Array<RecipeIngredientWithIngredient>> | null} List of RecipeIngredient objects with Ingredient object inside or null if error.
+ * @returns {PrismaPromise<Array<IngredientWithIngredientField>> | null} List of {ingredient: Ingredient} objects or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeIngredientsByRecipeId = (recipeId: number): PrismaPromise<Array<RecipeIngredientWithIngredient>> | null => {
+export const getRecipeIngredientsByRecipeId = (recipeId: number): PrismaPromise<Array<IngredientWithIngredientField>> | null => {
 	try {
-		return prisma.recipeIngredient.findMany({where: {recipeId}, include: {ingredient: true}})
+		return prisma.recipeIngredient.findMany({
+			where: {recipeId},
+			select: {ingredient: true, ingredientId: false, recipeId: false}
+		});
 	} catch (error) {
 		logger.error(error);
 		return null;
 	}
 };
 
-const shapeIngredientsArray = (recipeIngredientsWithIngredient: Array<RecipeIngredientWithIngredient>) => {
+const shapeIngredientsArray = (recipeIngredientsWithIngredient: Array<IngredientWithIngredientField>) => {
 	return recipeIngredientsWithIngredient.map(recipeIngredient => recipeIngredient.ingredient);
 };
 
-type RecipeCategoryWithCategory = RecipeCategory & { category: Category };
+type CategoryWithCategoryField = { category: Category };
 /**
- * Returns list of RecipeCategory objects or null if error.
+ * Returns list of {category: Category} objects or null if error.
  *
- * @returns {PrismaPromise<Array<RecipeCategoryWithCategory>> | null} List of RecipeCategory objects with Category object inside or null if error.
+ * @returns {PrismaPromise<Array<CategoryWithCategoryField>> | null} List of {category: Category} objects or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeCategoriesByRecipeId = (recipeId: number): PrismaPromise<Array<RecipeCategoryWithCategory>> | null => {
+export const getRecipeCategoriesByRecipeId = (recipeId: number): PrismaPromise<Array<CategoryWithCategoryField>> | null | any => {
 	try {
-		return prisma.recipeCategory.findMany({where: {recipeId}, include: {category: true}})
+		return prisma.recipeCategory.findMany({
+			where: {recipeId},
+			select: {category: true, categoryId: false, recipeId: false}
+		});
 	} catch (error) {
 		logger.error(error);
 		return null;
 	}
 };
 
-const shapeCategoriesArray = (recipeCategoriesWithCategory: Array<RecipeCategoryWithCategory>) => {
+const shapeCategoriesArray = (recipeCategoriesWithCategory: Array<CategoryWithCategoryField>) => {
 	return recipeCategoriesWithCategory.map(recipeCategory => recipeCategory.category);
 };
