@@ -5,11 +5,11 @@ import {
 	MISSING_BODY_FIELDS,
 	NOT_FOUND,
 	SERVER_ERROR,
-	SUCCESS
+	SUCCESS, VALIDATION_ERROR
 } from '../../utils/httpCodeResponses/messages';
 import {z} from 'zod';
 import validateObject from '../../utils/validateObject';
-import {createRecipe, getRecipesCount, getRecipeFullObjectById, getRecipesAll} from './recipe.service';
+import {createRecipe, getRecipesCount, getRecipeFullObjectById, getRecipesAllWithAuthors} from './recipe.service';
 
 export const CreateRecipeHandler = async (req: Request, res: Response) => {
 	const ValidationSchema = z.object({
@@ -62,7 +62,7 @@ export const CreateRecipeHandler = async (req: Request, res: Response) => {
 		return SERVER_ERROR(res, 'Something went wrong! Recipe has not been created');
 	}
 
-	return CREATED(res, 'Recipe created successfully', {recipe:createdRecipe});
+	return CREATED(res, 'Recipe created successfully', {recipe: createdRecipe});
 };
 
 export const GetRecipeByIdHandler = async (req: Request, res: Response) => {
@@ -88,28 +88,40 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 	const ValidationSchema = z.object({
 		page: z.string().regex(/^\d+$/).optional(),
 		limit: z.string().regex(/^\d+$/).optional(),
+		excludeMyRecipes: z.string().optional()
 	});
 
 	const validatedReqQuery = validateObject(ValidationSchema, req.query);
 
 	if (validatedReqQuery.data?.page == null && validatedReqQuery.data?.limit == null) {
-		const recipes = await getRecipesAll();
-
-		if (recipes == null) {
-			return NOT_FOUND(res, 'no recipes found');
-		}
-
-		return SUCCESS(res, 'Recipes fetched successfully', {recipes});
+		return BAD_REQUEST(res, 'page number OR maximum of recipes for page param is required');
 	}
 
-	const { page = PAGE_MIN, limit = LIMIT_MAX} = {
+	const {page = PAGE_MIN, limit = LIMIT_MAX} = {
 		page: parseInt(validatedReqQuery.data.page ?? '' + PAGE_MIN),
 		limit: parseInt(validatedReqQuery.data.limit ?? '' + LIMIT_MAX),
 	};
 	const startIndex = (page - 1) * limit;
 
-	const recipes = await getRecipesAll({startIndex, limit});
-	const totalRecipes = await getRecipesCount() ?? -1;
+	const recipes = await getRecipesAllWithAuthors({
+		startIndex,
+		limit,
+		doNotIncludeRecipesOfUserId: validatedReqQuery.data?.excludeMyRecipes === 'true' ? res.locals.user.id : undefined
+	});
+
+	if (recipes == null) {
+		return NOT_FOUND(res, 'no recipes found');
+	}
+
+	const recipesWithAuthors = recipes.map(recipe => {
+		const {user, ...rest} = recipe;
+		return {
+			...rest,
+			author: user
+		}
+	});
+
+	const totalRecipes = await getRecipesCount({doNotIncludeRecipesOfUserId: validatedReqQuery.data?.excludeMyRecipes === 'true' ? res.locals.user.id : undefined}) ?? -1;
 	const totalPages = Math.ceil(totalRecipes / limit);
 
 	const responseData = {
@@ -117,7 +129,7 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 		limit,
 		totalRecipes,
 		totalPages,
-		recipes
+		recipes: recipesWithAuthors
 	};
 
 	if (page > totalPages) {

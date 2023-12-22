@@ -119,17 +119,34 @@ export const getRecipeById = (recipeId: number): Promise<Recipe | null> | null =
  *
  * @param startIndex {number} Pagination parameter.
  * @param limit {number} Pagination parameter.
- * @returns {Promise<Array<Recipe>> | null} Array of Recipe objects or null if error.
+ * @param doNotIncludeRecipesOfUserId {number} User ID of author whose recipes you want to exclude from result.
+ * @returns  Array of Recipe objects or null if error.
  */
-export const getRecipesAll = ({startIndex, limit}: {
+export const getRecipesAllWithAuthors = ({startIndex, limit, doNotIncludeRecipesOfUserId}: {
 	startIndex?: number,
-	limit?: number
-} = {}): Promise<Array<Recipe>> | null => {
+	limit?: number,
+	doNotIncludeRecipesOfUserId?: number
+} = {}) => {
 	try {
 		return prisma.recipe.findMany({
+			where: {userId: {not: doNotIncludeRecipesOfUserId}},
 			orderBy: {createdAt: 'desc'},
 			skip: startIndex,
-			take: limit
+			take: limit,
+			select: {
+				user: {
+					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
+				},
+				id: true,
+				title: true,
+				cookingTimeMinutes: true,
+				description: true,
+				isPublic: true,
+				createdAt: true,
+				location: true,
+				latitude: true,
+				userId: true
+			}
 		});
 	} catch (error) {
 		logger.error(error);
@@ -140,11 +157,16 @@ export const getRecipesAll = ({startIndex, limit}: {
 /**
  * Returns number of recipes in the database.
  *
+ * @param doNotIncludeRecipesOfUserId {number} User ID of author whose recipes you want to exclude from result.
  * @returns {Promise<number> | null} Number of recipes in the database.
  */
-export const getRecipesCount = (): Promise<number> | null => {
+export const getRecipesCount = ({doNotIncludeRecipesOfUserId}: {
+	doNotIncludeRecipesOfUserId?: number
+} = {}): Promise<number> | null => {
 	try {
-		return prisma.recipe.count();
+		return prisma.recipe.count({
+			where: {userId: {not: doNotIncludeRecipesOfUserId ?? undefined}}
+		});
 	} catch (error) {
 		logger.error(error);
 		return null;

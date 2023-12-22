@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {Alert, Box, Container, Grid, LinearProgress, Snackbar} from '@mui/material';
 import {CredentialResponse, GoogleLogin} from '@react-oauth/google';
 import logo from '@/assets/logo.png';
@@ -11,6 +11,8 @@ const Login = () => {
 
 	const {handleLogin, currentUser} = useAuth();
 
+	const location = useLocation();
+	const query = new URLSearchParams(location.search);
 	const navigate = useNavigate();
 
 	const params = new URLSearchParams(window.location.search);
@@ -21,7 +23,7 @@ const Login = () => {
 	useEffect(() => {
 		if (currentUser == null) return;
 
-		navigate('/dashboard');
+		navigate(`/?${query.toString()}`);
 	}, [currentUser]);
 
 	const responseMessage = async (response: CredentialResponse) => {
@@ -29,13 +31,12 @@ const Login = () => {
 		setIsLoggedOut(false);
 		setIsKickedOut(false);
 		setLoading(true);
-		response.credential
 
 		const {success, error} = await handleLogin(response.credential ?? '');
 
 		// redirect authorized user to Dashboard page
 		if (success) {
-			return navigate('/dashboard');
+			return navigate('/');
 		}
 
 		setError(error ?? '');
