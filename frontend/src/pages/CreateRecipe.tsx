@@ -54,6 +54,7 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						onChange={(e) => handleCategoryChange(idx, e.target.value)}
 						disabled={loading}
 						error={isFieldError('category')}
+						required
 						fullWidth
 						sx={{mb: 2, mt: idx === 0 ? 3 : 1}}
 					/>
@@ -90,6 +91,7 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						onChange={(e) => handleIngredientChange(idx, e.target.value)}
 						disabled={loading}
 						error={isFieldError('ingredients')}
+						required
 						fullWidth
 						sx={{mb: 2, mt: idx === 0 ? 3 : 1}}
 					/>
