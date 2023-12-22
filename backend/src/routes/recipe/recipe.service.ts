@@ -19,7 +19,8 @@ type RecipeToAdd =
 	categories: Array<string>
 };
 
-type FullRecipeObject = Recipe & {
+type RecipeWithoutCoords = Omit<Recipe, 'latitude' | 'longitude'>;
+type FullRecipeObject = RecipeWithoutCoords & {
 	ingredients: Array<Ingredient>,
 	categories: Array<Category>,
 	author?: Omit<User, 'email' | 'banned'>
@@ -102,12 +103,24 @@ export const createRecipe = async (recipe: RecipeToAdd): Promise<FullRecipeObjec
 /**
  * Returns Recipe object with given recipe's ID.
  *
- * @returns {Promise<Recipe|null>|null} Recipe object or null if error.
+ * @returns {Promise<RecipeWithoutCoords|null>|null} RecipeWithoutCoords object or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeById = (recipeId: number): Promise<Recipe | null> | null => {
+export const getRecipeById = (recipeId: number): Promise<RecipeWithoutCoords | null> | null => {
 	try {
-		return prisma.recipe.findFirst({where: {id: recipeId}});
+		return prisma.recipe.findFirst({
+			where: {id: recipeId},
+			select: {
+				id: true,
+				title: true,
+				cookingTimeMinutes: true,
+				description: true,
+				isPublic: true,
+				createdAt: true,
+				location: true,
+				userId: true
+			}
+		});
 	} catch (error) {
 		logger.error(error);
 		return null;
@@ -119,17 +132,29 @@ export const getRecipeById = (recipeId: number): Promise<Recipe | null> | null =
  *
  * @param startIndex {number} Pagination parameter.
  * @param limit {number} Pagination parameter.
- * @param doNotIncludeRecipesOfUserId {number} User ID of author whose recipes you want to exclude from result.
- * @returns  Array of Recipe objects or null if error.
+ * @param currentLoggedUserId {number} User ID of currently logged user.
+ * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
+ * @returns  Array of RecipeWithoutCoords objects or null if error.
  */
-export const getRecipesAllWithAuthors = ({startIndex, limit, doNotIncludeRecipesOfUserId}: {
+export const getRecipesAllWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
 	startIndex?: number,
 	limit?: number,
-	doNotIncludeRecipesOfUserId?: number
-} = {}) => {
+	currentLoggedUserId: number,
+	doNotIncludeOwnRecipes?: boolean
+}) => {
 	try {
 		return prisma.recipe.findMany({
-			where: {userId: {not: doNotIncludeRecipesOfUserId}},
+			where: {
+				AND: [
+					{userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}},
+					{
+						OR: [
+							{isPublic: true},
+							{userId: currentLoggedUserId}
+						]
+					}
+				]
+			},
 			orderBy: {createdAt: 'desc'},
 			skip: startIndex,
 			take: limit,
@@ -144,7 +169,6 @@ export const getRecipesAllWithAuthors = ({startIndex, limit, doNotIncludeRecipes
 				isPublic: true,
 				createdAt: true,
 				location: true,
-				latitude: true,
 				userId: true
 			}
 		});
@@ -157,15 +181,27 @@ export const getRecipesAllWithAuthors = ({startIndex, limit, doNotIncludeRecipes
 /**
  * Returns number of recipes in the database.
  *
- * @param doNotIncludeRecipesOfUserId {number} User ID of author whose recipes you want to exclude from result.
+ * @param currentLoggedUserId {number} User ID of currently logged user.
+ * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
  * @returns {Promise<number> | null} Number of recipes in the database.
  */
-export const getRecipesCount = ({doNotIncludeRecipesOfUserId}: {
-	doNotIncludeRecipesOfUserId?: number
-} = {}): Promise<number> | null => {
+export const getRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
+	currentLoggedUserId: number,
+	doNotIncludeOwnRecipes?: boolean
+}): Promise<number> | null => {
 	try {
 		return prisma.recipe.count({
-			where: {userId: {not: doNotIncludeRecipesOfUserId ?? undefined}}
+			where: {
+				AND: [
+					{userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}},
+					{
+						OR: [
+							{isPublic: true},
+							{userId: currentLoggedUserId}
+						]
+					}
+				]
+			},
 		});
 	} catch (error) {
 		logger.error(error);

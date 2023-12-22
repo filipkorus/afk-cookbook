@@ -7,6 +7,8 @@ const PrivateRoute = () => {
 	const location = useLocation();
 	const query = new URLSearchParams(location.search);
 
+	query.set('from', location.pathname); // we can redirect user back when he is authenticated again
+
 	// ?kickedOut=true
 	return currentUser ? <Outlet /> : <Navigate to={`/login?${query.toString()}`} />;
 }

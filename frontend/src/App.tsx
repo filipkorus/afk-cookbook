@@ -11,6 +11,8 @@ import NotFound from '@/pages/errors/NotFound.tsx';
 import DrawerView from '@/pages/DrawerView.tsx';
 import {SidebarProvider} from '@/context/SidebarContext.tsx';
 import RecipeWall from '@/pages/RecipeWall.tsx';
+import RecipeCard from '@/pages/RecipeCard.tsx';
+import CreateRecipe from '@/pages/CreateRecipe.tsx';
 
 const App = () => {
 	return <Router>
@@ -20,6 +22,20 @@ const App = () => {
 					<CookbookProvider>
 						<Routes>
 							<Route path="/" element={<PrivateRoute/>}>
+								<Route path="recipe">
+									<Route path="" element={
+										<DrawerView>
+											<CreateRecipe/>
+										</DrawerView>
+									} />
+
+									<Route path=":id" element={
+										<DrawerView>
+											<RecipeCard/>
+										</DrawerView>
+									} />
+								</Route>
+
 								<Route path="" element={
 									<DrawerView>
 										<RecipeWall/>

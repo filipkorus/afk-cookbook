@@ -6,8 +6,6 @@ type Recipe = {
 	isPublic: boolean;
 	createdAt: Date;
 	location: string;
-	latitude: number;
-	longitude: number;
 	userId: number;
 };
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import RecipeCard, {RecipeWithAuthor} from '@/components/recipe/RecipeCard.tsx';
+import RecipeWallCard, {RecipeWithAuthor} from '@/components/recipe/RecipeWallCard.tsx';
 import {v4 as uuidv4} from 'uuid';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {getRecipes} from '@/api/recipe.ts';
@@ -16,23 +16,31 @@ const RecipeWall: React.FC = () => {
 	const recipesPerPage = 3;
 	const excludeMyRecipes = false;
 
+	const [loading, setLoading] = useState<boolean>(false);
 	const [recipes, setRecipes] = useState<Array<RecipeWithAuthor> | null>(null);
 	const [totalPages, setTotalPages] = useState<number>(0);
 	const [currentPage, setCurrentPage] = useState<number>(+(query.get('p') ?? 1));
 
 	const getRecipesHandler = () => {
+		setLoading(true);
+
 		getRecipes({
 			page: currentPage,
 			limit: recipesPerPage,
 			excludeMyRecipes
-		}).then(res => {
-			console.log(res);
-			setTotalPages(res.totalPages);
-			setRecipes(res.recipes);
-		});
-	}
+		})
+			.then(res => {
+				setTotalPages(res.totalPages);
+				setRecipes(res.recipes);
+			})
+			.finally(() => {
+				setLoading(false);
+			});
+	};
 
 	useEffect(() => {
+		if (loading) return;
+
 		getRecipesHandler();
 	}, [currentPage]);
 
@@ -48,9 +56,10 @@ const RecipeWall: React.FC = () => {
 
 	return <>
 		<div>
-			{recipes.map(recipe => <RecipeCard recipe={recipe} key={uuidv4()}/>)}
+			{recipes.map(recipe => <RecipeWallCard recipe={recipe} key={uuidv4()}/>)}
 
 			<Pagination
+				disabled={loading}
 				count={Math.ceil(totalPages)}
 				page={currentPage}
 				onChange={handlePageChange}

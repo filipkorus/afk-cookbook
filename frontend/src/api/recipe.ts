@@ -6,9 +6,17 @@ type RecipeToAdd = Pick<Recipe, 'title' | 'cookingTimeMinutes' | 'description'> 
 	location?: string;
 	latitude?: number;
 	longitude?: number;
+	categories: Array<string>,
+	ingredients: Array<string>
 };
-export const createRecipe = (recipe: RecipeToAdd) => api.post('/recipe', {...recipe});
-export const getRecipeById = (id: number) => api.get(`/recipe/${id}`);
+export const createRecipe = async (recipe: RecipeToAdd) => {
+	const {data} = await api.post('/recipe', {...recipe});
+	return data;
+}
+export const getRecipeById = async (id: number) => {
+	const {data} = await api.get(`/recipe/${id}`);
+	return data;
+}
 
 export const getRecipes = async ({page, limit, excludeMyRecipes}: {
 	page?: number,

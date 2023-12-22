@@ -2,6 +2,7 @@ import React from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SidebarMenuItem from '@/components/sidebar/menu/SidebarMenuItem';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import {useAuth} from '@/context/AuthContext.tsx';
 import {useNavigate} from 'react-router-dom';
 import {
@@ -11,7 +12,7 @@ import {
 	ListItemText,
 	Typography
 } from '@mui/material';
-import formatDate from '@/utils/formatDate.ts';
+import formatDate from '@/utils/date/formatDate.ts';
 
 const SidebarMenu: React.FC = () => {
 	const {currentUser, handleLogout} = useAuth();
@@ -38,6 +39,13 @@ const SidebarMenu: React.FC = () => {
 				}
 			/>
 		</ListItem>
+
+		<SidebarMenuItem
+			linkTo="/recipe"
+			text="Create Recipe"
+			title="Create Recipe"
+			icon={<PostAddIcon/>}
+		/>
 
 		<SidebarMenuItem
 			linkTo="/"

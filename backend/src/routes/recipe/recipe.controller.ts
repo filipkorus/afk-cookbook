@@ -5,7 +5,7 @@ import {
 	MISSING_BODY_FIELDS,
 	NOT_FOUND,
 	SERVER_ERROR,
-	SUCCESS, VALIDATION_ERROR
+	SUCCESS
 } from '../../utils/httpCodeResponses/messages';
 import {z} from 'zod';
 import validateObject from '../../utils/validateObject';
@@ -20,7 +20,7 @@ export const CreateRecipeHandler = async (req: Request, res: Response) => {
 		cookingTimeMinutes: z
 			.number({required_error: 'cooking time is required'})
 			.min(1, 'cooking time must be positive'),
-		description: z.string({required_error: 'description is required'}).trim(),
+		description: z.string({required_error: 'description is required'}).trim().min(10, 'description should be longer than 10 characters'),
 		isPublic: z.boolean().default(false),
 		location: z.string().trim().max(255).or(z.null()).default(null), // could be null
 		latitude: z.number().min(-90).max(90).or(z.null()).default(null), // could be null
@@ -78,6 +78,10 @@ export const GetRecipeByIdHandler = async (req: Request, res: Response) => {
 		return NOT_FOUND(res, `Recipe with ID of ${id} not found.`);
 	}
 
+	if (recipe.userId !== res.locals.user.id && !recipe.isPublic) {
+		return NOT_FOUND(res, `Recipe with ID of ${id} not found.`);
+	}
+
 	return SUCCESS(res, 'Recipe fetched successfully', {recipe});
 };
 
@@ -106,23 +110,29 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 	const recipes = await getRecipesAllWithAuthors({
 		startIndex,
 		limit,
-		doNotIncludeRecipesOfUserId: validatedReqQuery.data?.excludeMyRecipes === 'true' ? res.locals.user.id : undefined
+		currentLoggedUserId: res.locals.user.id,
+		doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true'
 	});
 
 	if (recipes == null) {
 		return NOT_FOUND(res, 'no recipes found');
 	}
 
-	const recipesWithAuthors = recipes.map(recipe => {
-		const {user, ...rest} = recipe;
-		return {
-			...rest,
-			author: user
-		}
-	});
 
-	const totalRecipes = await getRecipesCount({doNotIncludeRecipesOfUserId: validatedReqQuery.data?.excludeMyRecipes === 'true' ? res.locals.user.id : undefined}) ?? -1;
-	const totalPages = Math.ceil(totalRecipes / limit);
+	const recipesWithAuthors = recipes
+		.map(recipe => {
+			const {user, ...rest} = recipe;
+			return {
+				...rest,
+				author: user
+			}
+		});
+
+	const totalRecipes = await getRecipesCount({
+		currentLoggedUserId: res.locals.user.id,
+		doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true'
+	});
+	const totalPages = Math.ceil((totalRecipes ?? 0) / limit);
 
 	const responseData = {
 		page,
