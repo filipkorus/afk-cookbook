@@ -6,7 +6,7 @@ import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import User from '@/types/User.ts';
 import RouterLink from '@/components/routing/RouterLink.tsx';
 import {Navigate, useLocation} from 'react-router-dom';
-import timeSince from '@/utils/date/timeSince.tsx';
+import timeSince from '@/utils/date/timeSince.ts';
 
 export type RecipeWithAuthor = Recipe & { author: User };
 

@@ -3,7 +3,7 @@ import {useNavigate, useParams} from 'react-router-dom';
 import {getRecipeById} from '@/api/recipe.ts';
 import {AxiosError} from 'axios';
 import {Avatar, Card, CardActions, CardContent, CardHeader, IconButton} from '@mui/material';
-import timeSince from '@/utils/date/timeSince.tsx';
+import timeSince from '@/utils/date/timeSince.ts';
 import Recipe from '@/types/Recipe';
 import User from '@/types/User';
 import Category from '@/types/Category';
