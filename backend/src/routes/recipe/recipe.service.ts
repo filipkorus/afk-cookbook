@@ -136,7 +136,7 @@ export const getRecipeById = (recipeId: number): Promise<RecipeWithoutCoords | n
  * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
  * @returns  Array of RecipeWithoutCoords objects or null if error.
  */
-export const getRecipesAllWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
+export const getRecipesWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
 	startIndex?: number,
 	limit?: number,
 	currentLoggedUserId: number,
@@ -200,6 +200,78 @@ export const getRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
 							{userId: currentLoggedUserId}
 						]
 					}
+				]
+			},
+		});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
+};
+
+/**
+ * Returns array of Recipe objects created by given user.
+ *
+ * @param startIndex {number} Pagination parameter.
+ * @param limit {number} Pagination parameter.
+ * @param onlyPublic {boolean} Indicating whether to include only public recipes or both public and private.
+ * @param userId {number} User ID whose recipes you want.
+ * @returns  Array of RecipeWithoutCoords objects or null if error.
+ */
+export const getRecipesByUserIdWithAuthors = ({startIndex, limit, onlyPublic, userId}: {
+	startIndex?: number,
+	limit?: number,
+	onlyPublic?: boolean
+	userId: number,
+}) => {
+	try {
+		return prisma.recipe.findMany({
+			where: {
+				AND: [
+					{userId},
+					onlyPublic ? {isPublic: true} : {},
+				]
+			},
+			orderBy: {createdAt: 'desc'},
+			skip: startIndex,
+			take: limit,
+			select: {
+				user: {
+					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
+				},
+				id: true,
+				title: true,
+				cookingTimeMinutes: true,
+				description: true,
+				isPublic: true,
+				createdAt: true,
+				location: true,
+				userId: true
+			}
+		});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
+};
+
+/**
+ * Returns number of recipes created by given user in the database.
+ *
+ * @param onlyPublic {boolean} Indicating whether to include only public recipes or both public and private.
+ * @param userId {number} User ID whose recipes count you want.
+ * @returns {Promise<number> | null} Number of recipes created by given user in the database.
+ */
+export const getRecipesByUserIdCount = ({onlyPublic, userId}: {
+	onlyPublic?: boolean
+	userId: number,
+}): Promise<number> | null => {
+	try {
+		return prisma.recipe.count({
+			where: {
+				AND: [
+					{userId},
+					onlyPublic ? {isPublic: true} : {},
 				]
 			},
 		});

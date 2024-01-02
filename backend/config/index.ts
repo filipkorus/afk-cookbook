@@ -10,6 +10,12 @@ const config = {
 		SAVE_TO_FILE: false,
 		FILE: 'app.log'
 	},
+	APP: {
+		PAGINATION: {
+			PAGE_MIN: 1,
+			LIMIT_MAX: 3
+		}
+	},
 	OAUTH: {
 		GOOGLE_CLIENT_ID: process.env.OAUTH_GOOGLE_CLIENT_ID,
 	},
