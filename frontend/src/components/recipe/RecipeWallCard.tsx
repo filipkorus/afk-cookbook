@@ -26,7 +26,8 @@ const RecipeWallCard: React.FC<RecipeWallCardProps> = ({recipe}) => {
 			<CardHeader
 				avatar={<Avatar aria-label="User" alt={recipe.author.name} src={recipe.author.picture}/>}
 				title={`${recipe.author.name} | ${timeSince(recipe.createdAt)} ago`}
-				subheader={recipe.location ?? ''}
+				subheader={recipe.location ? recipe.location.charAt(0).toUpperCase() + recipe.location.slice(1) : ''}
+
 			/>
 			<CardContent>
 				<Typography variant="h5" mb={2}>
