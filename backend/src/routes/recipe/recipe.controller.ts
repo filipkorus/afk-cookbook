@@ -9,7 +9,14 @@ import {
 } from '../../utils/httpCodeResponses/messages';
 import {z} from 'zod';
 import validateObject from '../../utils/validateObject';
-import {createRecipe, getRecipesCount, getRecipeFullObjectById, getRecipesAllWithAuthors} from './recipe.service';
+import {
+	createRecipe,
+	getPublicRecipesCount,
+	getRecipeFullObjectById,
+	getPublicRecipesWithAuthors,
+	getRecipesByUserIdWithAuthors, getRecipesByUserIdCount
+} from './recipe.service';
+import config from '../../../config';
 
 export const CreateRecipeHandler = async (req: Request, res: Response) => {
 	const ValidationSchema = z.object({
@@ -86,9 +93,6 @@ export const GetRecipeByIdHandler = async (req: Request, res: Response) => {
 };
 
 export const GetRecipesHandler = async (req: Request, res: Response) => {
-	const PAGE_MIN = 1;
-	const LIMIT_MAX = 3;
-
 	const ValidationSchema = z.object({
 		page: z.string().regex(/^\d+$/).optional(),
 		limit: z.string().regex(/^\d+$/).optional(),
@@ -101,13 +105,19 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 		return BAD_REQUEST(res, 'page number OR maximum of recipes for page param is required');
 	}
 
-	const {page = PAGE_MIN, limit = LIMIT_MAX} = {
-		page: parseInt(validatedReqQuery.data.page ?? '' + PAGE_MIN),
-		limit: parseInt(validatedReqQuery.data.limit ?? '' + LIMIT_MAX),
+	const {page = config.APP.PAGINATION.PAGE_MIN, limit = config.APP.PAGINATION.LIMIT_MAX} = {
+		page: Math.max(
+			1,
+			parseInt(validatedReqQuery.data.page ?? '' + config.APP.PAGINATION.PAGE_MIN)
+		),
+		limit: Math.max(
+			1,
+			parseInt(validatedReqQuery.data.limit ?? '' + config.APP.PAGINATION.LIMIT_MAX)
+		)
 	};
 	const startIndex = (page - 1) * limit;
 
-	const recipes = await getRecipesAllWithAuthors({
+	const recipes = await getPublicRecipesWithAuthors({
 		startIndex,
 		limit,
 		currentLoggedUserId: res.locals.user.id,
@@ -118,6 +128,79 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 		return NOT_FOUND(res, 'no recipes found');
 	}
 
+	const recipesWithAuthors = recipes
+		.map(recipe => {
+			const {user, ...rest} = recipe;
+			return {
+				...rest,
+				author: user
+			}
+		});
+
+	const totalRecipes = await getPublicRecipesCount({
+		currentLoggedUserId: res.locals.user.id,
+		doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true'
+	});
+	const totalPages = Math.ceil((totalRecipes ?? 0) / limit);
+
+	const responseData = {
+		page,
+		limit,
+		totalRecipes,
+		totalPages,
+		recipes: recipesWithAuthors
+	};
+
+	if (page > totalPages) {
+		return BAD_REQUEST(res, 'No more pages', responseData);
+	}
+
+	return SUCCESS(res, 'Paginated recipes fetched successfully', responseData);
+};
+
+export const GetRecipesByUserIdHandler = async (req: Request, res: Response) => {
+	const {id: userId} = req.params;
+
+	if (userId == null || !Number.isInteger(Number(userId))) {
+		return BAD_REQUEST(res, 'Invalid or missing \'id\' param');
+	}
+
+	const ValidationSchema = z.object({
+		page: z.string().regex(/^\d+$/).optional(),
+		limit: z.string().regex(/^\d+$/).optional(),
+		includePublic: z.string().optional(),
+		includePrivate: z.string().optional(),
+	});
+
+	const validatedReqQuery = validateObject(ValidationSchema, req.query);
+
+	if (validatedReqQuery.data?.page == null && validatedReqQuery.data?.limit == null) {
+		return BAD_REQUEST(res, 'page number (page) OR maximum of recipes for page (limit) param is required');
+	}
+
+	const {page = config.APP.PAGINATION.PAGE_MIN, limit = config.APP.PAGINATION.LIMIT_MAX} = {
+		page: Math.max(
+			1,
+			parseInt(validatedReqQuery.data.page ?? '' + config.APP.PAGINATION.PAGE_MIN)
+		),
+		limit: Math.max(
+			1,
+			parseInt(validatedReqQuery.data.limit ?? '' + config.APP.PAGINATION.LIMIT_MAX)
+		)
+	};
+	const startIndex = (page - 1) * limit;
+
+	const recipes = await getRecipesByUserIdWithAuthors({
+		startIndex,
+		limit,
+		userId: +userId,
+		includePublic: validatedReqQuery.data?.includePublic === 'true',
+		includePrivate: validatedReqQuery.data?.includePrivate === 'true' && res.locals.user.id === +userId // currently logged user can only get public recipes of other user
+	});
+
+	if (recipes == null) {
+		return NOT_FOUND(res, 'no recipes found');
+	}
 
 	const recipesWithAuthors = recipes
 		.map(recipe => {
@@ -128,9 +211,10 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 			}
 		});
 
-	const totalRecipes = await getRecipesCount({
-		currentLoggedUserId: res.locals.user.id,
-		doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true'
+	const totalRecipes = await getRecipesByUserIdCount({
+		userId: +userId,
+		includePublic: validatedReqQuery.data?.includePublic === 'true',
+		includePrivate: validatedReqQuery.data?.includePrivate === 'true' && res.locals.user.id === +userId // currently logged user can only get public recipes of other user
 	});
 	const totalPages = Math.ceil((totalRecipes ?? 0) / limit);
 

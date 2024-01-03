@@ -14,19 +14,16 @@ import {z} from 'zod';
 import {createRecipe} from '@/api/recipe.ts';
 import {AxiosError} from 'axios';
 import useItemList from '@/hooks/useItemList.ts';
-
-const MAX_CATEGORIES_PER_RECIPE = 5;
-const MAX_INGREDIENTS_PER_RECIPE = 25;
+import config from '@/config';
 
 type CreateRecipeProps = {};
 
 const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [successMessage, setSuccessMessage] = useState<string>('');
-	const [errorFields, setErrorFields] = useState<Array<z.ZodIssue>>([]);
+	const [errorFields, setErrorFields] = useState<Array<z.ZodIssue & { minimum?: number, maximum?: number }>>([]);
 
-	const isFieldError = (fieldName: keyof RecipeToAdd | 'category' | 'ingredients') => errorFields.findIndex(error => error.path[0] === fieldName) !== -1;
-	const fieldErrorText = (fieldName: keyof RecipeToAdd | 'category' | 'ingredients') => errorFields.find(error => error.path[0] === fieldName)?.message ?? '';
+	const fieldError = (fieldName: keyof RecipeToAdd | 'categories' | 'ingredients') => errorFields.find(error => error.path[0] === fieldName);
 
 	const {formData, handleInputChange, resetForm} = useForm<RecipeToAdd>({
 		title: '',
@@ -42,8 +39,9 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 		addItem: addCategoryInput,
 		removeItem: removeCategoryInput,
 		resetList: resetCategories
-	} = useItemList([''], MAX_CATEGORIES_PER_RECIPE);
+	} = useItemList([''], config.APP.RECIPE.CATEGORY.QUANTITY.MAX);
 
+	const categoriesError = fieldError('categories');
 	const renderCategoryInputs = () => {
 		return categories.map((category, idx) => (
 			<Grid container spacing={2} key={idx}>
@@ -53,7 +51,26 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						value={category}
 						onChange={(e) => handleCategoryChange(idx, e.target.value)}
 						disabled={loading}
-						error={isFieldError('category')}
+						// inputProps={{
+						// 	minLength: config.APP.RECIPE.CATEGORY.LENGTH.MIN,
+						// 	maxLength: config.APP.RECIPE.CATEGORY.LENGTH.MAX
+						// }}
+						error={
+							(categoriesError?.code === 'too_small' &&
+								category.length < (categoriesError?.minimum ?? config.APP.RECIPE.CATEGORY.LENGTH.MIN))
+							||
+							(categoriesError?.code === 'too_big' &&
+								category.length > (categoriesError?.maximum ?? config.APP.RECIPE.CATEGORY.LENGTH.MAX))
+						}
+						helperText={
+							(categoriesError?.code === 'too_small' &&
+								category.length < (categoriesError?.minimum ?? config.APP.RECIPE.CATEGORY.LENGTH.MIN))
+							||
+							(categoriesError?.code === 'too_big' &&
+								category.length > (categoriesError?.maximum ?? config.APP.RECIPE.CATEGORY.LENGTH.MAX))
+								? categoriesError?.message : ''
+						}
+						required
 						fullWidth
 						sx={{mb: 2, mt: idx === 0 ? 3 : 1}}
 					/>
@@ -78,8 +95,9 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 		addItem: addIngredientInput,
 		removeItem: removeIngredientInput,
 		resetList: resetIngredients
-	} = useItemList([''], MAX_INGREDIENTS_PER_RECIPE);
+	} = useItemList([''], config.APP.RECIPE.INGREDIENT.QUANTITY.MAX);
 
+	const ingredientsError = fieldError('ingredients');
 	const renderIngredientInputs = () => {
 		return ingredients.map((ingredient, idx) => (
 			<Grid container spacing={2} key={idx}>
@@ -89,7 +107,26 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						value={ingredient}
 						onChange={(e) => handleIngredientChange(idx, e.target.value)}
 						disabled={loading}
-						error={isFieldError('ingredients')}
+						inputProps={{
+							minLength: config.APP.RECIPE.INGREDIENT.LENGTH.MIN,
+							maxLength: config.APP.RECIPE.INGREDIENT.LENGTH.MAX
+						}}
+						error={
+							(ingredientsError?.code === 'too_small' &&
+								ingredient.length < (ingredientsError?.minimum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MIN))
+							||
+							(ingredientsError?.code === 'too_big' &&
+								ingredient.length > (ingredientsError?.maximum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MAX))
+						}
+						helperText={
+							(ingredientsError?.code === 'too_small' &&
+								ingredient.length < (ingredientsError?.minimum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MIN))
+							||
+							(ingredientsError?.code === 'too_big' &&
+								ingredient.length > (ingredientsError?.maximum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MAX))
+								? ingredientsError?.message : ''
+						}
+						required
 						fullWidth
 						sx={{mb: 2, mt: idx === 0 ? 3 : 1}}
 					/>
@@ -146,9 +183,9 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 	return <Card>
 		<CardContent>
 			<Typography variant="h6">New recipe</Typography>
-			{successMessage && <Box  my={1}>
-				 <Alert severity="success">{successMessage}</Alert>
-			</Box>}
+			{successMessage && <Box my={1}>
+             <Alert severity="success">{successMessage}</Alert>
+         </Box>}
 			<form onSubmit={handleSubmit}>
 				<FormGroup>
 					<TextField
@@ -156,10 +193,14 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						required
 						label="Title"
 						name="title"
-						error={isFieldError('title')}
-						helperText={fieldErrorText('title')}
+						error={fieldError('title') != null}
+						helperText={fieldError('title')?.message}
 						onChange={handleInputChange}
 						disabled={loading}
+						inputProps={{
+							minLength: config.APP.RECIPE.TITLE.LENGTH.MIN,
+							maxLength: config.APP.RECIPE.TITLE.LENGTH.MAX
+						}}
 						value={formData.title}
 						fullWidth
 						sx={{mb: 2, mt: 1}}
@@ -175,8 +216,8 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 							inputMode: 'numeric',
 							pattern: '[0-9]*',
 						}}
-						error={isFieldError('cookingTimeMinutes')}
-						helperText={fieldErrorText('cookingTimeMinutes')}
+						error={fieldError('cookingTimeMinutes') != null}
+						helperText={fieldError('cookingTimeMinutes')?.message}
 						onChange={handleInputChange}
 						disabled={loading}
 						value={formData.cookingTimeMinutes}
@@ -189,10 +230,11 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						required
 						label="Description"
 						name="description"
-						error={isFieldError('description')}
-						helperText={fieldErrorText('description')}
+						error={fieldError('description') != null}
+						helperText={fieldError('description')?.message}
 						onChange={handleInputChange}
 						disabled={loading}
+						inputProps={{minLength: config.APP.RECIPE.DESCRIPTION.LENGTH.MIN}}
 						value={formData.description}
 						fullWidth
 						sx={{mb: 2, mt: 1}}
@@ -214,18 +256,25 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						onChange={handleInputChange}
 						value={formData.location}
 						disabled={loading}
-						error={isFieldError('location')}
-						helperText={fieldErrorText('location')}
+						inputProps={{maxLength: config.APP.RECIPE.LOCATION.LENGTH.MAX}}
+						error={fieldError('location') != null}
+						helperText={fieldError('location')?.message}
 						fullWidth
 						sx={{mb: 4}}
 					/>
 
 					<Divider/>
 
-					{fieldErrorText('category') && <Alert severity="error">{fieldErrorText('category')}</Alert>}
-					{renderCategoryInputs()}
-					<Box marginBottom={2}>
-						{categories.length < MAX_CATEGORIES_PER_RECIPE && (
+					<Box my={2}>
+						{
+							!categoriesError?.code.startsWith('too_') &&
+							categoriesError != null &&
+                      <Alert severity="error">{categoriesError?.message}</Alert>
+						}
+
+						{renderCategoryInputs()}
+
+						{categories.length < config.APP.RECIPE.CATEGORY.QUANTITY.MAX && (
 							<Button variant="contained" disabled={loading} onClick={addCategoryInput}>
 								Add category
 							</Button>
@@ -234,10 +283,16 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 
 					<Divider/>
 
-					{fieldErrorText('category') && <Alert severity="error">{fieldErrorText('category')}</Alert>}
-					{renderIngredientInputs()}
-					<Box marginBottom={2}>
-						{ingredients.length < MAX_INGREDIENTS_PER_RECIPE && (
+					<Box my={2}>
+						{
+							!ingredientsError?.code.startsWith('too_') &&
+							ingredientsError != null &&
+                      <Alert severity="error">{ingredientsError?.message}</Alert>
+						}
+
+						{renderIngredientInputs()}
+
+						{ingredients.length < config.APP.RECIPE.INGREDIENT.QUANTITY.MAX && (
 							<Button variant="contained" disabled={loading} onClick={addIngredientInput}>
 								Add ingredient
 							</Button>

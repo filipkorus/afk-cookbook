@@ -136,7 +136,7 @@ export const getRecipeById = (recipeId: number): Promise<RecipeWithoutCoords | n
  * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
  * @returns  Array of RecipeWithoutCoords objects or null if error.
  */
-export const getRecipesAllWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
+export const getPublicRecipesWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
 	startIndex?: number,
 	limit?: number,
 	currentLoggedUserId: number,
@@ -147,12 +147,7 @@ export const getRecipesAllWithAuthors = ({startIndex, limit, currentLoggedUserId
 			where: {
 				AND: [
 					{userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}},
-					{
-						OR: [
-							{isPublic: true},
-							{userId: currentLoggedUserId}
-						]
-					}
+					{isPublic: true}
 				]
 			},
 			orderBy: {createdAt: 'desc'},
@@ -185,7 +180,7 @@ export const getRecipesAllWithAuthors = ({startIndex, limit, currentLoggedUserId
  * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
  * @returns {Promise<number> | null} Number of recipes in the database.
  */
-export const getRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
+export const getPublicRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
 	currentLoggedUserId: number,
 	doNotIncludeOwnRecipes?: boolean
 }): Promise<number> | null => {
@@ -194,10 +189,91 @@ export const getRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
 			where: {
 				AND: [
 					{userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}},
+					{isPublic: true}
+				]
+			},
+		});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
+};
+
+/**
+ * Returns array of Recipe objects created by given user.
+ *
+ * @param startIndex {number} Pagination parameter.
+ * @param limit {number} Pagination parameter.
+ * @param includePublic {boolean} Indicating whether to include public recipes.
+ * @param includePrivate {boolean} Indicating whether to include private recipes.
+ * @param userId {number} User ID whose recipes you want.
+ * @returns  Array of RecipeWithoutCoords objects or null if error.
+ */
+export const getRecipesByUserIdWithAuthors = ({startIndex, limit, includePublic, includePrivate, userId}: {
+	startIndex?: number,
+	limit?: number,
+	includePublic?: boolean,
+	includePrivate?: boolean,
+	userId: number,
+}) => {
+	try {
+		return prisma.recipe.findMany({
+			where: {
+				AND: [
+					{userId},
 					{
 						OR: [
-							{isPublic: true},
-							{userId: currentLoggedUserId}
+							{isPublic: includePublic},
+							{isPublic: !includePrivate},
+						]
+					}
+				]
+			},
+			orderBy: {createdAt: 'desc'},
+			skip: startIndex,
+			take: limit,
+			select: {
+				user: {
+					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
+				},
+				id: true,
+				title: true,
+				cookingTimeMinutes: true,
+				description: true,
+				isPublic: true,
+				createdAt: true,
+				location: true,
+				userId: true
+			}
+		});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
+};
+
+/**
+ * Returns number of recipes created by given user in the database.
+ *
+ * @param includePublic {boolean} Indicating whether to include public recipes.
+ * @param includePrivate {boolean} Indicating whether to include private recipes.
+ * @param userId {number} User ID whose recipes count you want.
+ * @returns {Promise<number> | null} Number of recipes created by given user in the database.
+ */
+export const getRecipesByUserIdCount = ({includePublic, includePrivate, userId}: {
+	includePublic?: boolean,
+	includePrivate?: boolean
+	userId: number,
+}): Promise<number> | null => {
+	try {
+		return prisma.recipe.count({
+			where: {
+				AND: [
+					{userId},
+					{
+						OR: [
+							{isPublic: includePublic},
+							{isPublic: !includePrivate},
 						]
 					}
 				]

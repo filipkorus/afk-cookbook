@@ -40,3 +40,37 @@ export const getRecipes = async ({page, limit, excludeMyRecipes}: {
 
 	return data;
 };
+
+/**
+ * Returns fetched array of Recipe objects created by given user.
+ *
+ * @param page {number} Page number.
+ * @param limit {number} Entries per page.
+ * @param includePublic {boolean} Indicating whether to include public recipes.
+ * @param includePrivate {boolean} Indicating whether to include private recipes.
+ * @param userId {number} User ID whose recipes you want.
+ */
+export const getRecipesByUserId = async ({page, limit, includePublic, includePrivate, userId}: {
+	page?: number,
+	limit?: number,
+	includePublic?: boolean,
+	includePrivate?: boolean,
+	userId: number
+}) => {
+	let params = `includePublic=${includePublic ?? false}&includePrivate=${includePrivate ?? false}`;
+	if (page == null) {
+		if (limit != null) {
+			params += `&limit=${limit}`;
+		}
+	} else {
+		if (limit != null) {
+			params += `&page=${page}&limit=${limit}`;
+		} else {
+			params += `&page=${page}`;
+		}
+	}
+
+	const {data} = await api.get(`/recipe/user/${userId}?${params}`);
+
+	return data;
+};

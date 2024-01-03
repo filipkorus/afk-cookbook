@@ -19,6 +19,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import {useSidebar} from '@/context/SidebarContext';
 import RouterLink from '@/components/routing/RouterLink';
 import SidebarNavigation from '@/components/sidebar/SidebarNavigation.tsx';
+import {Navigate, useLocation} from 'react-router-dom';
 
 const drawerWidth: number = 240;
 
@@ -82,6 +83,15 @@ const DrawerView: React.FC<DraweViewProps> = ({children, pageTitle}) => {
 	const toggleDrawer = () => {
 		setIsSidebarOpen(prev => !prev);
 	};
+
+	const location = useLocation();
+	const query = new URLSearchParams(location.search);
+
+	const from = query.get('from');
+	if (from != null) {
+		query.delete('from');
+		return <Navigate to={`${from}?${query.toString()}`}/>;
+	}
 
 	return (
 		<ThemeProvider theme={defaultTheme}>

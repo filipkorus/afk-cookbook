@@ -1,9 +1,8 @@
 import {Router} from 'express';
-import requireAuth from '../../middlewares/requireAuth';
 import {GetUserHandler} from './user.controller';
 
 const router = Router();
 
-router.get('/', requireAuth, GetUserHandler);
+router.get('/', GetUserHandler);
 
 export default router;
