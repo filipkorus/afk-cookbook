@@ -4,6 +4,7 @@ import {Alert, Box, Container, Grid, LinearProgress, Snackbar} from '@mui/materi
 import {CredentialResponse, GoogleLogin} from '@react-oauth/google';
 import logo from '@/assets/logo.png';
 import {useAuth} from '@/context/AuthContext.tsx';
+import './pages.css';
 
 const Login = () => {
 	const [loading, setLoading] = useState<boolean>(false);
@@ -50,17 +51,20 @@ const Login = () => {
 
 	return <>
 		<Container maxWidth={false} style={{
-			height: '100vh',
+			height: '95vh',
 			overflow: 'hidden'
 		}}
 		>
-			{(loading && currentUser == null) &&
-             <LinearProgress color="secondary" sx={{
-					 position: 'absolute',
-					 top: 0,
-					 left: 0,
-					 width: '100%'
-				 }}/>
+			{loading && currentUser == null && (
+				<LinearProgress
+					color="secondary"
+					sx={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						width: '100%',
+					}}
+				/>)
 			}
 
 			<Grid
@@ -71,9 +75,12 @@ const Login = () => {
 				justifyContent="center"
 				height="100%"
 			>
-
+				<div style={{ textAlign: 'center' }}>
 				<img className="logo-animation" src={logo} alt="logo"/>
-
+					<p style={{ justifySelf: 'center', fontFamily: 'Brush Script MT, cursive', fontSize: '32px',color:'#960f5a' }}>
+						--------------CookBook--------------
+					</p>
+				</div>
 				<Box marginTop='2rem'>
 					{
 						(!loading && currentUser == null) &&

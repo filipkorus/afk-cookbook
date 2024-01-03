@@ -28,6 +28,7 @@ const RecipeWallCard: React.FC<RecipeWallCardProps> = ({recipe}) => {
 		<Card>
 			<CardHeader
 				avatar={<Avatar aria-label="User" alt={recipe.author.name} src={recipe.author.picture}/>}
+				subheader={recipe.location ? recipe.location.charAt(0).toUpperCase() + recipe.location.slice(1) : ''}
 				title={
 					<Grid container spacing={2}>
 						<Grid item xs={10}>
@@ -41,7 +42,6 @@ const RecipeWallCard: React.FC<RecipeWallCardProps> = ({recipe}) => {
 						</Grid>
 					</Grid>
 				}
-				subheader={recipe.location ?? ''}
 			/>
 			<CardContent>
 				<Typography variant="h5" mb={2}>

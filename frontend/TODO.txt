@@ -1,0 +1,4 @@
+- dorobic przegladanie wlasnych przepisow wszystkich
+- dorobic edycje wlasnych przepisow
+-naprawić przycisk logout jak ekran sie zmiejsza
+- zmienic na textarea recipe descripton przy robieniu
