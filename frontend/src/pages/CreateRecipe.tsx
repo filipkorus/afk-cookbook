@@ -15,6 +15,7 @@ import {createRecipe} from '@/api/recipe.ts';
 import {AxiosError} from 'axios';
 import useItemList from '@/hooks/useItemList.ts';
 import config from '@/config';
+import theme from '@/theme';
 
 type CreateRecipeProps = {};
 
@@ -182,7 +183,7 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 
 	return <Card>
 		<CardContent>
-			<Typography variant="h6">New recipe</Typography>
+			<Typography variant="h6" fontFamily="MonoSpace">New recipe</Typography>
 			{successMessage && <Box my={1}>
              <Alert severity="success">{successMessage}</Alert>
          </Box>}
@@ -275,7 +276,8 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						{renderCategoryInputs()}
 
 						{categories.length < config.APP.RECIPE.CATEGORY.QUANTITY.MAX && (
-							<Button variant="contained" disabled={loading} onClick={addCategoryInput}>
+							<Button style={{backgroundColor: theme.palette.primary.main}} variant="contained"
+							        disabled={loading} onClick={addCategoryInput}>
 								Add category
 							</Button>
 						)}
@@ -293,14 +295,18 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						{renderIngredientInputs()}
 
 						{ingredients.length < config.APP.RECIPE.INGREDIENT.QUANTITY.MAX && (
-							<Button variant="contained" disabled={loading} onClick={addIngredientInput}>
+							<Button style={{backgroundColor: theme.palette.primary.main}} variant="contained"
+							        disabled={loading}
+							        onClick={addIngredientInput}>
 								Add ingredient
 							</Button>
 						)}
 					</Box>
 				</FormGroup>
 
-				<Button variant="outlined" type="submit" disabled={loading} fullWidth>Save</Button>
+				<Button style={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
+				        variant="outlined" type="submit"
+				        disabled={loading} fullWidth>Save</Button>
 			</form>
 		</CardContent>
 	</Card>;

@@ -20,6 +20,7 @@ import {useSidebar} from '@/context/SidebarContext';
 import RouterLink from '@/components/routing/RouterLink';
 import SidebarNavigation from '@/components/sidebar/SidebarNavigation.tsx';
 import {Navigate, useLocation} from 'react-router-dom';
+import theme from '@/theme';
 
 const drawerWidth: number = 240;
 
@@ -100,7 +101,8 @@ const DrawerView: React.FC<DraweViewProps> = ({children, pageTitle}) => {
 				<AppBar position="absolute" open={isSidebarOpen}>
 					<Toolbar
 						sx={{
-							pr: '24px', // keep right padding when drawer closed
+							pr: '24px',
+							backgroundColor: theme.palette.primary.main
 						}}
 					>
 						<IconButton
@@ -161,10 +163,6 @@ const DrawerView: React.FC<DraweViewProps> = ({children, pageTitle}) => {
 				<Box
 					component="main"
 					sx={{
-						backgroundColor: (theme) =>
-							theme.palette.mode === 'light'
-								? theme.palette.grey[100]
-								: theme.palette.grey[900],
 						flexGrow: 1,
 						height: '100vh',
 						overflow: 'auto',

@@ -4,7 +4,7 @@ import {Alert, Box, Container, Grid, LinearProgress, Snackbar} from '@mui/materi
 import {CredentialResponse, GoogleLogin} from '@react-oauth/google';
 import logo from '@/assets/logo.png';
 import {useAuth} from '@/context/AuthContext.tsx';
-import './pages.css';
+import '@/styles/pages.css';
 
 const Login = () => {
 	const [loading, setLoading] = useState<boolean>(false);

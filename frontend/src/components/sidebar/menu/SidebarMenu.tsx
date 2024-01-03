@@ -16,10 +16,13 @@ import {
 	Box,
 } from '@mui/material';
 import formatDate from '@/utils/date/formatDate.ts';
+import {useSidebar} from '@/context/SidebarContext.tsx';
+import theme from '@/theme';
 
 const SidebarMenu: React.FC = () => {
 	const { currentUser, handleLogout } = useAuth();
 	const navigate = useNavigate();
+	const {isSidebarOpen} = useSidebar();
 
 	if (currentUser == null) return <></>;
 
@@ -33,7 +36,10 @@ const SidebarMenu: React.FC = () => {
 					primary={currentUser.name}
 					secondary={
 						<Typography
-							sx={{ display: 'inline' }}
+							sx={{
+								display: 'inline',
+								textAlign: isSidebarOpen ? 'left' : 'center',
+							}}
 							component="span"
 							variant="body2"
 							color="text.primary"
@@ -51,28 +57,33 @@ const SidebarMenu: React.FC = () => {
 				icon={<PostAddIcon />}
 			/>
 
-		<SidebarMenuItem
-			linkTo={`/recipe/user/${currentUser.id}`}
-			text="My recipes"
-			title="My recipes"
-			icon={<ListIcon/>}
-		/>
+			<SidebarMenuItem
+				linkTo={`/recipe/user/${currentUser.id}`}
+				text="My recipes"
+				title="My recipes"
+				icon={<ListIcon />}
+			/>
 
-		<SidebarMenuItem
-			linkTo="/"
-			text="Wall"
-			title="Wall"
-			icon={<DashboardIcon/>}
-		/>
+			<SidebarMenuItem
+				linkTo="/"
+				text="Wall"
+				title="Wall"
+				icon={<DashboardIcon />}
+			/>
 
 			<Box sx={{ mt: 'auto' }}>
-				{/* mt: 'auto' dla marginesu na dole */}
 				<Button
 					fullWidth
-					style={{maxWidth:'95%',marginLeft:'2%'}}
-
+					style={{
+						display: 'flex',
+						color:theme.palette.primary.main,
+						borderColor:theme.palette.primary.main,
+						maxWidth: '95%',
+						margin: '0 auto',
+						textTransform: 'none',
+					}}
+					title="Log out"
 					variant="outlined"
-					startIcon={<LogoutIcon />}
 					onClick={() =>
 						handleLogout().then(({ success, error }) => {
 							if (error) return alert(error);
@@ -80,7 +91,25 @@ const SidebarMenu: React.FC = () => {
 						})
 					}
 				>
-					Log out
+					<Box
+						sx={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}
+					>
+						<LogoutIcon sx={{ marginLeft: isSidebarOpen ? '5px' : '0' }} />
+						{isSidebarOpen && (
+							<Typography
+								sx={{
+									display: 'inline',
+									marginLeft: '5px',
+								}}
+							>
+								Log out
+							</Typography>
+						)}
+					</Box>
 				</Button>
 			</Box>
 		</Box>

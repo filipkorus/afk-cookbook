@@ -20,3 +20,11 @@
         opacity: 0.3;
     }
 }
+
+:root {
+    --primary: #51526b !important;
+}
+
+.MuiCheckbox-colorPrimary.Mui-checked {
+    color: var(--primary) !important;
+}
