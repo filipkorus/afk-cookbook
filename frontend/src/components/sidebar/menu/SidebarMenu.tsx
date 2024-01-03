@@ -77,6 +77,8 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isSidebarOpen }) => {
 					fullWidth
 					style={{
 						display: 'flex',
+						color:'#51526b',
+						borderColor:'#51526b',
 						alignItems: isSidebarOpen ? 'flex-start' : 'center',
 						justifyContent: 'center',
 						maxWidth: '95%',

@@ -44,15 +44,15 @@ const RecipeWallCard: React.FC<RecipeWallCardProps> = ({recipe}) => {
 				}
 			/>
 			<CardContent>
-				<Typography variant="h5" mb={2}>
-					{recipe.title}
+				<Typography style={{fontFamily:"Monospace"}} variant="h5" mb={2}>
+					{recipe.title ? recipe.title.charAt(0).toUpperCase() + recipe.title.slice(1) : ''}
 				</Typography>
-				<Typography variant="body1" color="textPrimary" component="p">
+				<Typography  variant="body1" color="textPrimary" component="p">
 					{recipe.description.slice(0, 100)}{recipe.description.length > 100 && <>...</>}
 				</Typography>
 				<Box my={2}>
 					<RouterLink to={`/recipe/${recipe.id}`}>
-						<Button variant="outlined" size="small" fullWidth>See full recipe</Button>
+						<Button  style={{color:'#51526b',borderColor:'#51526b'}} variant="outlined" size="small" fullWidth>See full recipe</Button>
 					</RouterLink>
 				</Box>
 			</CardContent>

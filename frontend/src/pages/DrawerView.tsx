@@ -102,6 +102,7 @@ const DrawerView: React.FC<DraweViewProps> = ({children, pageTitle}) => {
 						sx={{
 							pr: '24px', // keep right padding when drawer closed
 						}}
+						style={{backgroundColor:'#51526b'}}
 					>
 						<IconButton
 							edge="start"

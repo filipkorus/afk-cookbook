@@ -13,7 +13,7 @@ import {
     Typography,
     Box,
 } from '@mui/material';
-import timeSince from '@/utils/date/timeSince.tsx';
+import timeSince from '@/utils/date/timeSince.ts';
 import Recipe from '@/types/Recipe';
 import User from '@/types/User';
 import Category from '@/types/Category';
@@ -71,7 +71,7 @@ const RecipeCard: React.FC<RecipeProps> = ({}) => {
                 subheader={recipe.location ? recipe.location.charAt(0).toUpperCase() + recipe.location.slice(1) : ''}
             />
             <CardContent>
-                <Box fontSize="26px" fontFamily="cursive">
+                <Box fontSize="26px" fontFamily="Monospace">
                     {recipe.title ? recipe.title.charAt(0).toUpperCase() + recipe.title.slice(1) : ''}
                 </Box>
                 <Box color="lightgray">
@@ -83,12 +83,12 @@ const RecipeCard: React.FC<RecipeProps> = ({}) => {
                        </span>
                     ))}
                 </Box>
-                <Typography fontSize="16px" fontFamily="cursive" my={1}>
+                <Typography fontSize="16px" fontFamily="Monospace" my={1}>
                     Time: {recipe.cookingTimeMinutes} min
                 </Typography>
-                <Box sx={{ fontSize: '16px', listStyleType: 'none' }}>
+                <Box sx={{ fontSize: '16px', listStyleType: 'none', border: '1.5px solid #51526b',marginBottom:'10px', paddingLeft: '5px',paddingTop:'10px', borderRadius: '10px' }}>
                     Ingredients:
-                    <ul style={{ paddingLeft: 0, marginTop: 0 }}>
+                    <ul style={{  marginTop: 5 }}>
                         {recipe.ingredients.map((ingredient, idx) => (
                             <li
                                 key={idx}
@@ -106,6 +106,7 @@ const RecipeCard: React.FC<RecipeProps> = ({}) => {
                         ))}
                     </ul>
                 </Box>
+
                 <Typography component="p" fontSize="16px">{recipe.description}</Typography>
             </CardContent>
             <CardActions disableSpacing>
