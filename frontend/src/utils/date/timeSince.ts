@@ -1,5 +1,5 @@
 const timeSince = (date: string | Date) => {
-	const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+	const seconds = Math.floor(Math.abs((new Date().getTime() - new Date(date).getTime())) / 1000);
 
 	const secondsIn = {
 		year: 31536000,
@@ -34,7 +34,9 @@ const timeSince = (date: string | Date) => {
 		return `${Math.floor(interval)}m`;
 	}
 
-	return `${Math.floor(seconds)}s`;
+	const sec = Math.floor(seconds);
+
+	return sec < 5 ? 'now' : `${sec}s`;
 }
 
 export default timeSince;

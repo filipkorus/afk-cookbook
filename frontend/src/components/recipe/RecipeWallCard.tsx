@@ -1,12 +1,24 @@
 import React from 'react';
 import Recipe from '@/types/Recipe.ts';
-import {Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, IconButton, Typography} from '@mui/material';
+import {
+	Avatar,
+	Box,
+	Button,
+	Card,
+	CardActions,
+	CardContent,
+	CardHeader,
+	Grid,
+	IconButton,
+	Typography
+} from '@mui/material';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import LockIcon from '@mui/icons-material/Lock';
 import User from '@/types/User.ts';
 import RouterLink from '@/components/routing/RouterLink.tsx';
 import {Navigate, useLocation} from 'react-router-dom';
-import timeSince from '@/utils/date/timeSince.tsx';
+import timeSince from '@/utils/date/timeSince.ts';
 
 export type RecipeWithAuthor = Recipe & { author: User };
 
@@ -18,14 +30,26 @@ const RecipeWallCard: React.FC<RecipeWallCardProps> = ({recipe}) => {
 
 	const from = query.get('from');
 	if (from != null) {
-		return <Navigate to={from} />;
+		return <Navigate to={from}/>;
 	}
 
 	return <Box m={2}>
 		<Card>
 			<CardHeader
 				avatar={<Avatar aria-label="User" alt={recipe.author.name} src={recipe.author.picture}/>}
-				title={`${recipe.author.name} | ${timeSince(recipe.createdAt)} ago`}
+				title={
+					<Grid container spacing={2}>
+						<Grid item xs={10}>
+								<Typography variant="subtitle2">{recipe.author.name} | {timeSince(recipe.createdAt)} ago</Typography>
+
+						</Grid>
+						<Grid item xs={2} textAlign="right">
+							<Box mr={1} title="This recipe is private">
+								{!recipe.isPublic && <LockIcon />}
+							</Box>
+						</Grid>
+					</Grid>
+				}
 				subheader={recipe.location ?? ''}
 			/>
 			<CardContent>
