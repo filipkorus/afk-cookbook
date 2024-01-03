@@ -136,7 +136,7 @@ export const getRecipeById = (recipeId: number): Promise<RecipeWithoutCoords | n
  * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
  * @returns  Array of RecipeWithoutCoords objects or null if error.
  */
-export const getRecipesWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
+export const getPublicRecipesWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
 	startIndex?: number,
 	limit?: number,
 	currentLoggedUserId: number,
@@ -147,12 +147,7 @@ export const getRecipesWithAuthors = ({startIndex, limit, currentLoggedUserId, d
 			where: {
 				AND: [
 					{userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}},
-					{
-						OR: [
-							{isPublic: true},
-							{userId: currentLoggedUserId}
-						]
-					}
+					{isPublic: true}
 				]
 			},
 			orderBy: {createdAt: 'desc'},
@@ -185,7 +180,7 @@ export const getRecipesWithAuthors = ({startIndex, limit, currentLoggedUserId, d
  * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
  * @returns {Promise<number> | null} Number of recipes in the database.
  */
-export const getRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
+export const getPublicRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
 	currentLoggedUserId: number,
 	doNotIncludeOwnRecipes?: boolean
 }): Promise<number> | null => {
@@ -194,12 +189,7 @@ export const getRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
 			where: {
 				AND: [
 					{userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}},
-					{
-						OR: [
-							{isPublic: true},
-							{userId: currentLoggedUserId}
-						]
-					}
+					{isPublic: true}
 				]
 			},
 		});
@@ -214,14 +204,16 @@ export const getRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
  *
  * @param startIndex {number} Pagination parameter.
  * @param limit {number} Pagination parameter.
- * @param onlyPublic {boolean} Indicating whether to include only public recipes or both public and private.
+ * @param includePublic {boolean} Indicating whether to include public recipes.
+ * @param includePrivate {boolean} Indicating whether to include private recipes.
  * @param userId {number} User ID whose recipes you want.
  * @returns  Array of RecipeWithoutCoords objects or null if error.
  */
-export const getRecipesByUserIdWithAuthors = ({startIndex, limit, onlyPublic, userId}: {
+export const getRecipesByUserIdWithAuthors = ({startIndex, limit, includePublic, includePrivate, userId}: {
 	startIndex?: number,
 	limit?: number,
-	onlyPublic?: boolean
+	includePublic?: boolean,
+	includePrivate?: boolean,
 	userId: number,
 }) => {
 	try {
@@ -229,7 +221,12 @@ export const getRecipesByUserIdWithAuthors = ({startIndex, limit, onlyPublic, us
 			where: {
 				AND: [
 					{userId},
-					onlyPublic ? {isPublic: true} : {},
+					{
+						OR: [
+							{isPublic: includePublic},
+							{isPublic: !includePrivate},
+						]
+					}
 				]
 			},
 			orderBy: {createdAt: 'desc'},
@@ -258,12 +255,14 @@ export const getRecipesByUserIdWithAuthors = ({startIndex, limit, onlyPublic, us
 /**
  * Returns number of recipes created by given user in the database.
  *
- * @param onlyPublic {boolean} Indicating whether to include only public recipes or both public and private.
+ * @param includePublic {boolean} Indicating whether to include public recipes.
+ * @param includePrivate {boolean} Indicating whether to include private recipes.
  * @param userId {number} User ID whose recipes count you want.
  * @returns {Promise<number> | null} Number of recipes created by given user in the database.
  */
-export const getRecipesByUserIdCount = ({onlyPublic, userId}: {
-	onlyPublic?: boolean
+export const getRecipesByUserIdCount = ({includePublic, includePrivate, userId}: {
+	includePublic?: boolean,
+	includePrivate?: boolean
 	userId: number,
 }): Promise<number> | null => {
 	try {
@@ -271,7 +270,12 @@ export const getRecipesByUserIdCount = ({onlyPublic, userId}: {
 			where: {
 				AND: [
 					{userId},
-					onlyPublic ? {isPublic: true} : {},
+					{
+						OR: [
+							{isPublic: includePublic},
+							{isPublic: !includePrivate},
+						]
+					}
 				]
 			},
 		});

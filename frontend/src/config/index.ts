@@ -17,7 +17,21 @@ const CONFIG = {
 	PRODUCTION: production,
 	DOMAIN: domain,
 	API_URL: getApiUrl(),
-	OAUTH_GOOGLE_CLIENT_ID: '325396365340-a0ufpksrnsmigrpko21ah2to0n3p6uv9.apps.googleusercontent.com'
+	OAUTH_GOOGLE_CLIENT_ID: '325396365340-a0ufpksrnsmigrpko21ah2to0n3p6uv9.apps.googleusercontent.com',
+	APP: {
+		PAGINATION: {
+			RECIPES_PER_PAGE: 3,
+			STARTING_PAGE_NUMBER: 1
+		},
+		RECIPE: {
+			TITLE: {LENGTH: {MIN: 0, MAX: 255}},
+			DESCRIPTION: {LENGTH: {MIN: 10}},
+			LOCATION: {LENGTH: {MAX: 255}},
+			LATITUDE: {MIN: -90, MAX: 90},
+			LONGITUDE: {MIN: -180, MAX: 180},
+			INGREDIENT: {LENGTH: {MIN: 2, MAX: 100}, QUANTITY: {MIN: 1, MAX: 25}},
+			CATEGORY: {LENGTH: {MIN: 2, MAX: 100}, QUANTITY: {MIN: 1, MAX: 5}}
+		}
+	}
 } as const;
-
 export default CONFIG;
