@@ -17,7 +17,11 @@ import {
 } from '@mui/material';
 import formatDate from '@/utils/date/formatDate.ts';
 
-const SidebarMenu: React.FC = () => {
+interface SidebarMenuProps {
+	isSidebarOpen: boolean;
+}
+
+const SidebarMenu: React.FC<SidebarMenuProps> = ({ isSidebarOpen }) => {
 	const { currentUser, handleLogout } = useAuth();
 	const navigate = useNavigate();
 
@@ -33,7 +37,10 @@ const SidebarMenu: React.FC = () => {
 					primary={currentUser.name}
 					secondary={
 						<Typography
-							sx={{ display: 'inline' }}
+							sx={{
+								display: 'inline',
+								textAlign: isSidebarOpen ? 'left' : 'center',
+							}}
 							component="span"
 							variant="body2"
 							color="text.primary"
@@ -46,33 +53,38 @@ const SidebarMenu: React.FC = () => {
 
 			<SidebarMenuItem
 				linkTo="/recipe"
-				text="Create Recipe"
+				text={isSidebarOpen ? 'Create Recipe' : ''}
 				title="Create Recipe"
-				icon={<PostAddIcon />}
+				icon={<PostAddIcon sx={{ fontSize: '1.5rem' }} />}
 			/>
 
-		<SidebarMenuItem
-			linkTo={`/recipe/user/${currentUser.id}`}
-			text="My recipes"
-			title="My recipes"
-			icon={<ListIcon/>}
-		/>
+			<SidebarMenuItem
+				linkTo={`/recipe/user/${currentUser.id}`}
+				text={isSidebarOpen ? 'My recipes' : ''}
+				title="My recipes"
+				icon={<ListIcon sx={{ fontSize: '1.5rem' }} />}
+			/>
 
-		<SidebarMenuItem
-			linkTo="/"
-			text="Wall"
-			title="Wall"
-			icon={<DashboardIcon/>}
-		/>
+			<SidebarMenuItem
+				linkTo="/"
+				text={isSidebarOpen ? 'Wall' : ''}
+				title="Wall"
+				icon={<DashboardIcon sx={{ fontSize: '1.5rem' }} />}
+			/>
 
 			<Box sx={{ mt: 'auto' }}>
-				{/* mt: 'auto' dla marginesu na dole */}
 				<Button
 					fullWidth
-					style={{maxWidth:'95%',marginLeft:'2%'}}
-
+					style={{
+						display: 'flex',
+						alignItems: isSidebarOpen ? 'flex-start' : 'center',
+						justifyContent: 'center',
+						maxWidth: '95%',
+						margin: '0 auto',
+						textTransform: 'none',
+						fontSize: isSidebarOpen ? 'inherit' : '1rem',
+					}}
 					variant="outlined"
-					startIcon={<LogoutIcon />}
 					onClick={() =>
 						handleLogout().then(({ success, error }) => {
 							if (error) return alert(error);
@@ -80,7 +92,25 @@ const SidebarMenu: React.FC = () => {
 						})
 					}
 				>
-					Log out
+					<Box
+						sx={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}
+					>
+						<LogoutIcon sx={{ fontSize: '1.5rem', marginLeft: isSidebarOpen ? '5px' : '0' }} />
+						{isSidebarOpen && (
+							<Typography
+								sx={{
+									display: 'inline',
+									marginLeft: '5px',
+								}}
+							>
+								Log out
+							</Typography>
+						)}
+					</Box>
 				</Button>
 			</Box>
 		</Box>
