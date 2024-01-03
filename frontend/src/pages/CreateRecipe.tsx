@@ -51,10 +51,10 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						value={category}
 						onChange={(e) => handleCategoryChange(idx, e.target.value)}
 						disabled={loading}
-						// inputProps={{
-						// 	minLength: config.APP.RECIPE.CATEGORY.LENGTH.MIN,
-						// 	maxLength: config.APP.RECIPE.CATEGORY.LENGTH.MAX
-						// }}
+						inputProps={{
+							minLength: config.APP.RECIPE.CATEGORY.LENGTH.MIN,
+							maxLength: config.APP.RECIPE.CATEGORY.LENGTH.MAX
+						}}
 						error={
 							(categoriesError?.code === 'too_small' &&
 								category.length < (categoriesError?.minimum ?? config.APP.RECIPE.CATEGORY.LENGTH.MIN))

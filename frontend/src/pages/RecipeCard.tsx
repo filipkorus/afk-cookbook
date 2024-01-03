@@ -13,7 +13,7 @@ import {
     Typography,
     Box,
 } from '@mui/material';
-import timeSince from '@/utils/date/timeSince.ts';
+import timeSince from '@/utils/date/timeSince';
 import Recipe from '@/types/Recipe';
 import User from '@/types/User';
 import Category from '@/types/Category';
