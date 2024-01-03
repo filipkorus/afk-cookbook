@@ -39,9 +39,15 @@ const RecipeWall: React.FC = () => {
 
 				console.error(error);
 
-				if (error?.response?.data?.totalPages === 0) {
+				const {totalPages} = error?.response?.data;
+
+				if (totalPages === 0) {
 					setRecipes([]);
 					setTotalPages(0);
+				}
+
+				if (currentPage > totalPages) {
+					setCurrentPage(totalPages);
 				}
 			})
 			.finally(() => {
