@@ -21,6 +21,10 @@
     }
 }
 
+:root {
+    --primary: #51526b !important;
+}
+
 .MuiCheckbox-colorPrimary.Mui-checked {
-    color: #51526b !important;
+    color: var(--primary) !important;
 }

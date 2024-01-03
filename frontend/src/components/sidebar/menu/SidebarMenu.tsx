@@ -16,14 +16,13 @@ import {
 	Box,
 } from '@mui/material';
 import formatDate from '@/utils/date/formatDate.ts';
+import {useSidebar} from '@/context/SidebarContext.tsx';
+import theme from '@/theme';
 
-interface SidebarMenuProps {
-	isSidebarOpen: boolean;
-}
-
-const SidebarMenu: React.FC<SidebarMenuProps> = ({ isSidebarOpen }) => {
+const SidebarMenu: React.FC = () => {
 	const { currentUser, handleLogout } = useAuth();
 	const navigate = useNavigate();
+	const {isSidebarOpen} = useSidebar();
 
 	if (currentUser == null) return <></>;
 
@@ -53,23 +52,23 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isSidebarOpen }) => {
 
 			<SidebarMenuItem
 				linkTo="/recipe"
-				text={isSidebarOpen ? 'Create Recipe' : ''}
+				text="Create Recipe"
 				title="Create Recipe"
-				icon={<PostAddIcon sx={{ fontSize: '1.5rem' }} />}
+				icon={<PostAddIcon />}
 			/>
 
 			<SidebarMenuItem
 				linkTo={`/recipe/user/${currentUser.id}`}
-				text={isSidebarOpen ? 'My recipes' : ''}
+				text="My recipes"
 				title="My recipes"
-				icon={<ListIcon sx={{ fontSize: '1.5rem' }} />}
+				icon={<ListIcon />}
 			/>
 
 			<SidebarMenuItem
 				linkTo="/"
-				text={isSidebarOpen ? 'Wall' : ''}
+				text="Wall"
 				title="Wall"
-				icon={<DashboardIcon sx={{ fontSize: '1.5rem' }} />}
+				icon={<DashboardIcon />}
 			/>
 
 			<Box sx={{ mt: 'auto' }}>
@@ -77,15 +76,13 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isSidebarOpen }) => {
 					fullWidth
 					style={{
 						display: 'flex',
-						color:'#51526b',
-						borderColor:'#51526b',
-						alignItems: isSidebarOpen ? 'flex-start' : 'center',
-						justifyContent: 'center',
+						color:theme.palette.primary.main,
+						borderColor:theme.palette.primary.main,
 						maxWidth: '95%',
 						margin: '0 auto',
 						textTransform: 'none',
-						fontSize: isSidebarOpen ? 'inherit' : '1rem',
 					}}
+					title="Log out"
 					variant="outlined"
 					onClick={() =>
 						handleLogout().then(({ success, error }) => {
@@ -101,7 +98,7 @@ const SidebarMenu: React.FC<SidebarMenuProps> = ({ isSidebarOpen }) => {
 							justifyContent: 'center',
 						}}
 					>
-						<LogoutIcon sx={{ fontSize: '1.5rem', marginLeft: isSidebarOpen ? '5px' : '0' }} />
+						<LogoutIcon sx={{ marginLeft: isSidebarOpen ? '5px' : '0' }} />
 						{isSidebarOpen && (
 							<Typography
 								sx={{
