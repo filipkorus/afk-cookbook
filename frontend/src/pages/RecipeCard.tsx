@@ -11,6 +11,7 @@ import {
     IconButton,
     Checkbox,
     Typography,
+    Box,
 } from '@mui/material';
 import timeSince from '@/utils/date/timeSince.tsx';
 import Recipe from '@/types/Recipe';
@@ -70,18 +71,27 @@ const RecipeCard: React.FC<RecipeProps> = ({}) => {
                 subheader={recipe.location ? recipe.location.charAt(0).toUpperCase() + recipe.location.slice(1) : ''}
             />
             <CardContent>
-                <Typography component="div" style={{ fontSize: '26px', fontFamily: 'cursive' }}>
+                <Box fontSize="26px" fontFamily="cursive">
                     {recipe.title ? recipe.title.charAt(0).toUpperCase() + recipe.title.slice(1) : ''}
-                </Typography>
-                <Typography style={{ fontSize: '16px', fontFamily: 'cursive' }}>
+                </Box>
+                <Box color="lightgray">
+                    {recipe.categories.length > 1 ? 'Categories: ' : 'Category: '}
+                    {recipe.categories.map((category, idx) => (
+                       <span key={idx}>
+                           {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                           {idx < recipe.categories.length - 1 && ', '}
+                       </span>
+                    ))}
+                </Box>
+                <Typography fontSize="16px" fontFamily="cursive" my={1}>
                     Time: {recipe.cookingTimeMinutes} min
                 </Typography>
-                <Typography style={{ fontSize: '16px', listStyleType: 'none' }}>
+                <Box sx={{ fontSize: '16px', listStyleType: 'none' }}>
                     Ingredients:
                     <ul style={{ paddingLeft: 0, marginTop: 0 }}>
-                        {recipe.ingredients.map((ingredient) => (
+                        {recipe.ingredients.map((ingredient, idx) => (
                             <li
-                                key={ingredient.id}
+                                key={idx}
                                 style={{
                                     listStyleType: 'none',
                                     textDecoration: checkedIngredients.includes(ingredient.id) ? 'line-through' : 'none',
@@ -95,17 +105,8 @@ const RecipeCard: React.FC<RecipeProps> = ({}) => {
                             </li>
                         ))}
                     </ul>
-                </Typography>
-                <Typography style={{ fontSize: '16px' }}>{recipe.description}</Typography>
-                <footer style={{ color: 'lightgray' }}>
-                    {recipe.categories.length > 1 ? 'Categories:' : 'Category:'}{' '}
-                    {recipe.categories.map((category, index) => (
-                        <span key={category.id}>
-              {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-                            {index < recipe.categories.length - 1 && ', '}
-            </span>
-                    ))}
-                </footer>
+                </Box>
+                <Typography component="p" fontSize="16px">{recipe.description}</Typography>
             </CardContent>
             <CardActions disableSpacing>
                 <IconButton aria-label="Like" title="Like">

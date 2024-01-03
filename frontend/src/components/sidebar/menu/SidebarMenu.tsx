@@ -53,7 +53,7 @@ const SidebarMenu: React.FC = () => {
 			<SidebarMenuItem linkTo="/" text="Wall" title="Wall" icon={<DashboardIcon />} />
 
 			<Box sx={{ mt: 'auto' }}>
-				{/* Ustaw mt: 'auto' dla marginesu na dole */}
+				{/* mt: 'auto' dla marginesu na dole */}
 				<Button
 					fullWidth
 					style={{maxWidth:'95%',marginLeft:'2%'}}
