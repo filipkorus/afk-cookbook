@@ -6,6 +6,7 @@ import {useAuth} from '@/context/AuthContext.tsx';
 import RecipeListPagination from '@/components/recipe/RecipeListPagination.tsx';
 import {Box, Checkbox, FormControlLabel, FormGroup} from '@mui/material';
 import config from '@/config';
+import {AxiosError} from 'axios';
 
 const RecipeWall: React.FC = () => {
 	const {currentUser} = useAuth();
@@ -32,6 +33,16 @@ const RecipeWall: React.FC = () => {
 			.then(res => {
 				setTotalPages(res.totalPages);
 				setRecipes(res.recipes);
+			})
+			.catch(error => {
+				if (!(error instanceof AxiosError)) return;
+
+				console.error(error);
+
+				if (error?.response?.data?.totalPages === 0) {
+					setRecipes([]);
+					setTotalPages(0);
+				}
 			})
 			.finally(() => {
 				setLoading(false);
