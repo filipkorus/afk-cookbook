@@ -17,7 +17,6 @@ import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import LockIcon from '@mui/icons-material/Lock';
 import User from '@/types/User.ts';
 import RouterLink from '@/components/routing/RouterLink.tsx';
-import {Navigate, useLocation} from 'react-router-dom';
 import timeSince from '@/utils/date/timeSince.ts';
 
 export type RecipeWithAuthor = Recipe & { author: User };
@@ -25,14 +24,6 @@ export type RecipeWithAuthor = Recipe & { author: User };
 type RecipeWallCardProps = { recipe: RecipeWithAuthor };
 
 const RecipeWallCard: React.FC<RecipeWallCardProps> = ({recipe}) => {
-	const location = useLocation();
-	const query = new URLSearchParams(location.search);
-
-	const from = query.get('from');
-	if (from != null) {
-		return <Navigate to={from}/>;
-	}
-
 	return <Box m={2}>
 		<Card>
 			<CardHeader
