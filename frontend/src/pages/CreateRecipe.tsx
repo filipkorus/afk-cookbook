@@ -182,7 +182,7 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 
 	return <Card>
 		<CardContent>
-			<Typography variant="h6">New recipe</Typography>
+			<Typography variant="h6" style={{fontFamily:'MonoSpace'}}>New recipe</Typography>
 			{successMessage && <Box my={1}>
              <Alert severity="success">{successMessage}</Alert>
          </Box>}
@@ -275,7 +275,7 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						{renderCategoryInputs()}
 
 						{categories.length < config.APP.RECIPE.CATEGORY.QUANTITY.MAX && (
-							<Button variant="contained" disabled={loading} onClick={addCategoryInput}>
+							<Button style={{backgroundColor:'#51526b'}} variant="contained" disabled={loading} onClick={addCategoryInput}>
 								Add category
 							</Button>
 						)}
@@ -293,14 +293,14 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 						{renderIngredientInputs()}
 
 						{ingredients.length < config.APP.RECIPE.INGREDIENT.QUANTITY.MAX && (
-							<Button variant="contained" disabled={loading} onClick={addIngredientInput}>
+							<Button style={{backgroundColor:'#51526b'}} variant="contained" disabled={loading} onClick={addIngredientInput}>
 								Add ingredient
 							</Button>
 						)}
 					</Box>
 				</FormGroup>
 
-				<Button variant="outlined" type="submit" disabled={loading} fullWidth>Save</Button>
+				<Button  style={{color:'#51526b',borderColor:'#51526b'}} variant="outlined" type="submit" disabled={loading} fullWidth>Save</Button>
 			</form>
 		</CardContent>
 	</Card>;
