@@ -52,6 +52,8 @@ const UserRecipes: React.FC = () => {
 				if (totalPages === 0) {
 					setRecipes([]);
 					setTotalPages(0);
+
+					return;
 				}
 
 				if (currentPage > totalPages) {
