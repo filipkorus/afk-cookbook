@@ -1,33 +1,41 @@
 import React, {useEffect, useState} from 'react';
-import {RecipeWithAuthor} from '@/components/recipe/RecipeWallCard.tsx';
-import {useLocation, useNavigate} from 'react-router-dom';
-import {getRecipes} from '@/api/recipe.ts';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useAuth} from '@/context/AuthContext.tsx';
-import RecipeListPagination from '@/components/recipe/RecipeListPagination.tsx';
-import {Box, Checkbox, FormControlLabel, FormGroup} from '@mui/material';
+import {RecipeWithAuthor} from '@/components/recipe/RecipeWallCard.tsx';
 import config from '@/config';
+import {Box, Checkbox, FormControlLabel, FormGroup} from '@mui/material';
+import RecipeListPagination from '@/components/recipe/RecipeListPagination.tsx';
+import {getRecipesByUserId} from '@/api/recipe.ts';
 
-const RecipeWall: React.FC = () => {
+const UserRecipes: React.FC = () => {
+	const {id: userId} = useParams();
+
 	const {currentUser} = useAuth();
 
 	const location = useLocation();
 	const query = new URLSearchParams(location.search);
 	const navigate = useNavigate();
 
-	const [includeMyRecipes, setIncludeMyRecipes] = useState<boolean>(false);
+	const [includePrivate, setIncludePrivate] = useState<boolean>(true);
+	const [includePublic, setIncludePublic] = useState<boolean>(true);
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [recipes, setRecipes] = useState<Array<RecipeWithAuthor> | null>(null);
 	const [totalPages, setTotalPages] = useState<number>(0);
-	const [currentPage, setCurrentPage] = useState<number>(Math.max(1, +(query.get('p') ?? config.APP.PAGINATION.STARTING_PAGE_NUMBER)));
+	const [currentPage, setCurrentPage] = useState<number>(
+		Math.max(1, +(query.get('p') ?? 1)));
 
-	const getRecipesHandler = () => {
+	const getRecipesByUserIdHandler = () => {
+		if (userId == null) return;
+
 		setLoading(true);
 
-		getRecipes({
+		getRecipesByUserId({
 			page: currentPage,
 			limit: config.APP.PAGINATION.RECIPES_PER_PAGE,
-			excludeMyRecipes: !includeMyRecipes
+			includePrivate,
+			includePublic,
+			userId: +userId
 		})
 			.then(res => {
 				setTotalPages(res.totalPages);
@@ -39,10 +47,11 @@ const RecipeWall: React.FC = () => {
 	};
 
 	useEffect(() => {
+		if (userId == null) return;
 		if (loading) return;
 
-		getRecipesHandler();
-	}, [currentPage, includeMyRecipes]);
+		getRecipesByUserIdHandler();
+	}, [currentPage, userId, includePublic, includePrivate]);
 
 	useEffect(() => {
 		query.set('p', currentPage.toString());
@@ -65,16 +74,33 @@ const RecipeWall: React.FC = () => {
 						<Checkbox
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 								const {checked} = e.target;
-								setIncludeMyRecipes(checked);
+								setIncludePublic(checked);
 								if (checked) {
 									return;
 								}
-								setCurrentPage(config.APP.PAGINATION.STARTING_PAGE_NUMBER);
+								if (!includePrivate) setIncludePrivate(true);
 							}}
-							checked={includeMyRecipes}
+							checked={includePublic}
 						/>
 					}
 					label="Show my public recipes"
+				/>
+
+				<FormControlLabel
+					control={
+						<Checkbox
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								const {checked} = e.target;
+								setIncludePrivate(checked);
+								if (checked) {
+									return;
+								}
+								if (!includePublic) setIncludePublic(true);
+							}}
+							checked={includePrivate}
+						/>
+					}
+					label="Show my private recipes"
 				/>
 			</FormGroup>
 		</Box>
@@ -89,4 +115,4 @@ const RecipeWall: React.FC = () => {
 	</>;
 };
 
-export default RecipeWall;
+export default UserRecipes;

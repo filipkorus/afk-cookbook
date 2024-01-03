@@ -1,6 +1,7 @@
 import React from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import ListIcon from '@mui/icons-material/List';
 import SidebarMenuItem from '@/components/sidebar/menu/SidebarMenuItem';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useAuth } from '@/context/AuthContext.tsx';
@@ -50,7 +51,19 @@ const SidebarMenu: React.FC = () => {
 				icon={<PostAddIcon />}
 			/>
 
-			<SidebarMenuItem linkTo="/" text="Wall" title="Wall" icon={<DashboardIcon />} />
+		<SidebarMenuItem
+			linkTo={`/recipe/user/${currentUser.id}`}
+			text="My recipes"
+			title="My recipes"
+			icon={<ListIcon/>}
+		/>
+
+		<SidebarMenuItem
+			linkTo="/"
+			text="Wall"
+			title="Wall"
+			icon={<DashboardIcon/>}
+		/>
 
 			<Box sx={{ mt: 'auto' }}>
 				{/* mt: 'auto' dla marginesu na dole */}

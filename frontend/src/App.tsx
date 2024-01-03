@@ -13,6 +13,7 @@ import {SidebarProvider} from '@/context/SidebarContext.tsx';
 import RecipeWall from '@/pages/RecipeWall.tsx';
 import RecipeCard from '@/pages/RecipeCard.tsx';
 import CreateRecipe from '@/pages/CreateRecipe.tsx';
+import UserRecipes from '@/pages/UserRecipes.tsx';
 
 const App = () => {
 	return <Router>
@@ -27,13 +28,21 @@ const App = () => {
 										<DrawerView>
 											<CreateRecipe/>
 										</DrawerView>
-									} />
+									}/>
 
 									<Route path=":id" element={
 										<DrawerView>
 											<RecipeCard/>
 										</DrawerView>
-									} />
+									}/>
+
+									<Route path="user">
+										<Route path=":id" element={
+											<DrawerView>
+												<UserRecipes/>
+											</DrawerView>
+										}/>
+									</Route>
 								</Route>
 
 								<Route path="" element={
