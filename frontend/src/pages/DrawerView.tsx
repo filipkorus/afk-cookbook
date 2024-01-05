@@ -126,15 +126,15 @@ const DrawerView: React.FC<DraweViewProps> = ({children, pageTitle}) => {
 						>
 							{pageTitle ?? 'AFK Cookbook'}
 						</Typography>
-						<IconButton color="inherit">
-							<RouterLink to="#">
-								<Badge
-									badgeContent={0} color="secondary"
-								>
-									<NotificationsIcon/>
-								</Badge>
-							</RouterLink>
-						</IconButton>
+						{/*<IconButton color="inherit">*/}
+						{/*	<RouterLink to="#">*/}
+						{/*		<Badge*/}
+						{/*			badgeContent={0} color="secondary"*/}
+						{/*		>*/}
+						{/*			<NotificationsIcon/>*/}
+						{/*		</Badge>*/}
+						{/*	</RouterLink>*/}
+						{/*</IconButton>*/}
 					</Toolbar>
 				</AppBar>
 				<Drawer

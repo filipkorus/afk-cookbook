@@ -6,7 +6,7 @@ import logo from '@/assets/logo.png';
 import {useAuth} from '@/context/AuthContext.tsx';
 import '@/styles/pages.css';
 
-const Login = () => {
+const LoginPage = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string>('');
 
@@ -106,4 +106,4 @@ const Login = () => {
 	</>
 };
 
-export default Login;
+export default LoginPage;

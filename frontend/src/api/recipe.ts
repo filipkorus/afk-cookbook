@@ -1,7 +1,8 @@
 import api from '@/api/index.ts';
 import Recipe from '@/types/Recipe.ts';
+import RecipeToAdd from '@/types/RecipeToAdd.ts';
 
-type RecipeToAdd = Pick<Recipe, 'title' | 'cookingTimeMinutes' | 'description'> & {
+type RecipeToAddWithCategoriesAndIngredients = Pick<Recipe, 'title' | 'cookingTimeMinutes' | 'description'> & {
 	isPublic?: boolean;
 	location?: string;
 	latitude?: number;
@@ -9,7 +10,8 @@ type RecipeToAdd = Pick<Recipe, 'title' | 'cookingTimeMinutes' | 'description'> 
 	categories: Array<string>,
 	ingredients: Array<string>
 };
-export const createRecipe = async (recipe: RecipeToAdd) => {
+
+export const createRecipe = async (recipe: RecipeToAddWithCategoriesAndIngredients) => {
 	const {data} = await api.post('/recipe', {...recipe});
 	return data;
 }
@@ -70,7 +72,7 @@ export const getRecipesByUserId = async ({page, limit, includePublic, includePri
 		}
 	}
 
-	const {data} = await api.get(`/recipe/user/${userId}?${params}`);
+	const {data} = await api.get(`/recipe/?userId=${userId}&${params}`);
 
 	return data;
 };

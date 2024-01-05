@@ -17,9 +17,7 @@ import useItemList from '@/hooks/useItemList.ts';
 import config from '@/config';
 import theme from '@/theme';
 
-type CreateRecipeProps = {};
-
-const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
+const CreateRecipePage: React.FC = ({}) => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [successMessage, setSuccessMessage] = useState<string>('');
 	const [errorFields, setErrorFields] = useState<Array<z.ZodIssue & { minimum?: number, maximum?: number }>>([]);
@@ -227,6 +225,8 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 					/>
 
 					<TextField
+						multiline
+						maxRows={10}
 						variant="outlined"
 						required
 						label="Description"
@@ -312,4 +312,4 @@ const CreateRecipe: React.FC<CreateRecipeProps> = ({}) => {
 	</Card>;
 };
 
-export default CreateRecipe;
+export default CreateRecipePage;

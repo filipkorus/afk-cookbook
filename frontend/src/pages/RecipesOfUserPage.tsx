@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import {useAuth} from '@/context/AuthContext.tsx';
-import {RecipeWithAuthor} from '@/components/recipe/RecipeWallCard.tsx';
+import {useAuth} from '@/context/AuthContext';
 import config from '@/config';
 import {Box, Checkbox, FormControlLabel, FormGroup} from '@mui/material';
-import RecipeListPagination from '@/components/recipe/RecipeListPagination.tsx';
-import {getRecipesByUserId} from '@/api/recipe.ts';
+import RecipeListPagination from '@/components/recipe/RecipeListPagination';
+import {getRecipesByUserId} from '@/api/recipe';
 import {AxiosError} from 'axios';
+import {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard';
 
-const UserRecipes: React.FC = () => {
+const RecipesOfUserPage: React.FC = () => {
 	const {id: userId} = useParams();
 
 	const {currentUser} = useAuth();
@@ -21,7 +21,7 @@ const UserRecipes: React.FC = () => {
 	const [includePublic, setIncludePublic] = useState<boolean>(true);
 
 	const [loading, setLoading] = useState<boolean>(false);
-	const [recipes, setRecipes] = useState<Array<RecipeWithAuthor> | null>(null);
+	const [recipes, setRecipes] = useState<Array<RecipeWithCategoriesIngredientsAuthorAndStars> | null>(null);
 	const [totalPages, setTotalPages] = useState<number>(0);
 	const [currentPage, setCurrentPage] = useState<number>(
 		Math.max(1, +(query.get('p') ?? 1)));
@@ -81,12 +81,14 @@ const UserRecipes: React.FC = () => {
 		setCurrentPage(page);
 	}
 
-	if (recipes == null || currentUser == null) {
+	if (recipes == null || currentUser == null || userId == null) {
 		return <></>;
 	}
 
 	return <>
-		<Box mx={2}>
+
+		{(+userId) === currentUser.id &&
+			<Box mx={2}>
 			<FormGroup>
 				<FormControlLabel
 					control={
@@ -122,7 +124,7 @@ const UserRecipes: React.FC = () => {
 					label="Show my private recipes"
 				/>
 			</FormGroup>
-		</Box>
+		</Box>}
 
 		<RecipeListPagination
 			recipes={recipes ?? []}
@@ -134,4 +136,4 @@ const UserRecipes: React.FC = () => {
 	</>;
 };
 
-export default UserRecipes;
+export default RecipesOfUserPage;

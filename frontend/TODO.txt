@@ -1,4 +1,3 @@
-- dorobic przegladanie wlasnych przepisow wszystkich
-- dorobic edycje wlasnych przepisow
--naprawić przycisk logout jak ekran sie zmiejsza
+- dorobic edycje/usuwanie wlasnych przepisow
+- naprawić responsywność src/pages/LoginPage.tsc na urzadzeniach mobilnych
 - zmienic na textarea recipe descripton przy robieniu

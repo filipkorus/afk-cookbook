@@ -53,14 +53,14 @@ model Recipe {
 }
 
 model RecipeReview {
-  id         Int      @id @default(autoincrement())
-  isPositive Boolean
-  comment    String?  @db.Text
-  Recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  recipeId   Int
-  User       User     @relation(fields: [userId], references: [id])
-  userId     Int
-  createdAt  DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  stars     Float
+  comment   String   @default("") @db.VarChar(1000)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId  Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
 }
 
 model Ingredient {

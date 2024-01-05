@@ -7,11 +7,12 @@ import {GoogleOAuthProvider} from '@react-oauth/google';
 import {SidebarProvider} from '@/context/SidebarContext.tsx';
 import {CookbookProvider} from '@/context/CookbookContext.tsx';
 import {AuthProvider} from '@/context/AuthContext.tsx';
+import theme from '@/theme';
 // import '@/styles/index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>
-		<ThemeProvider theme={{}}>
+		<ThemeProvider theme={theme}>
 			<GoogleOAuthProvider clientId={CONFIG.OAUTH_GOOGLE_CLIENT_ID}>
 				<AuthProvider>
 					<SidebarProvider>

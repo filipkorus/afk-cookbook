@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {RecipeWithAuthor} from '@/components/recipe/RecipeWallCard.tsx';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {getRecipes} from '@/api/recipe.ts';
 import {useAuth} from '@/context/AuthContext.tsx';
@@ -7,8 +6,9 @@ import RecipeListPagination from '@/components/recipe/RecipeListPagination.tsx';
 import {Box, Checkbox, FormControlLabel, FormGroup} from '@mui/material';
 import config from '@/config';
 import {AxiosError} from 'axios';
+import {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard.tsx';
 
-const RecipeWall: React.FC = () => {
+const RecipeWallPage: React.FC = () => {
 	const {currentUser} = useAuth();
 
 	const location = useLocation();
@@ -18,7 +18,7 @@ const RecipeWall: React.FC = () => {
 	const [includeMyRecipes, setIncludeMyRecipes] = useState<boolean>(false);
 
 	const [loading, setLoading] = useState<boolean>(false);
-	const [recipes, setRecipes] = useState<Array<RecipeWithAuthor> | null>(null);
+	const [recipes, setRecipes] = useState<Array<RecipeWithCategoriesIngredientsAuthorAndStars> | null>(null);
 	const [totalPages, setTotalPages] = useState<number>(0);
 	const [currentPage, setCurrentPage] = useState<number>(Math.max(1, +(query.get('p') ?? config.APP.PAGINATION.STARTING_PAGE_NUMBER)));
 
@@ -108,4 +108,4 @@ const RecipeWall: React.FC = () => {
 	</>;
 };
 
-export default RecipeWall;
+export default RecipeWallPage;

@@ -3,8 +3,6 @@ import {
 	Recipe,
 	Ingredient,
 	Category,
-	RecipeIngredient,
-	RecipeCategory,
 	PrismaPromise, User
 } from '@prisma/client';
 import logger from '../../utils/logger';
@@ -134,7 +132,7 @@ export const getRecipeById = (recipeId: number): Promise<RecipeWithoutCoords | n
  * @param limit {number} Pagination parameter.
  * @param currentLoggedUserId {number} User ID of currently logged user.
  * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
- * @returns  Array of RecipeWithoutCoords objects or null if error.
+ * @returns Array of RecipeWithoutCoords objects or null if error.
  */
 export const getPublicRecipesWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
 	startIndex?: number,
@@ -207,7 +205,7 @@ export const getPublicRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecip
  * @param includePublic {boolean} Indicating whether to include public recipes.
  * @param includePrivate {boolean} Indicating whether to include private recipes.
  * @param userId {number} User ID whose recipes you want.
- * @returns  Array of RecipeWithoutCoords objects or null if error.
+ * @returns Array of RecipeWithoutCoords objects or null if error.
  */
 export const getRecipesByUserIdWithAuthors = ({startIndex, limit, includePublic, includePrivate, userId}: {
 	startIndex?: number,
@@ -314,8 +312,8 @@ export const getRecipeFullObjectById = async (recipeId: number): Promise<FullRec
 		return {
 			...recipe,
 			author: authorWithOutUselessInfo,
-			categories: shapeCategoriesArray(categories),
-			ingredients: shapeIngredientsArray(ingredients)
+			categories: _shapeCategoriesArray(categories),
+			ingredients: _shapeIngredientsArray(ingredients)
 		};
 	} catch (error) {
 		logger.error(error);
@@ -342,7 +340,7 @@ export const getRecipeIngredientsByRecipeId = (recipeId: number): PrismaPromise<
 	}
 };
 
-const shapeIngredientsArray = (recipeIngredientsWithIngredient: Array<IngredientWithIngredientField>) => {
+export const _shapeIngredientsArray = (recipeIngredientsWithIngredient: Array<IngredientWithIngredientField>) => {
 	return recipeIngredientsWithIngredient.map(recipeIngredient => recipeIngredient.ingredient);
 };
 
@@ -353,7 +351,7 @@ type CategoryWithCategoryField = { category: Category };
  * @returns {PrismaPromise<Array<CategoryWithCategoryField>> | null} List of {category: Category} objects or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeCategoriesByRecipeId = (recipeId: number): PrismaPromise<Array<CategoryWithCategoryField>> | null | any => {
+export const getRecipeCategoriesByRecipeId = (recipeId: number): PrismaPromise<Array<CategoryWithCategoryField>> | null => {
 	try {
 		return prisma.recipeCategory.findMany({
 			where: {recipeId},
@@ -365,6 +363,6 @@ export const getRecipeCategoriesByRecipeId = (recipeId: number): PrismaPromise<A
 	}
 };
 
-const shapeCategoriesArray = (recipeCategoriesWithCategory: Array<CategoryWithCategoryField>) => {
+export const _shapeCategoriesArray = (recipeCategoriesWithCategory: Array<CategoryWithCategoryField>) => {
 	return recipeCategoriesWithCategory.map(recipeCategory => recipeCategory.category);
 };

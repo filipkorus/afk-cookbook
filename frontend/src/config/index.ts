@@ -31,6 +31,10 @@ const CONFIG = {
 			LONGITUDE: {MIN: -180, MAX: 180},
 			INGREDIENT: {LENGTH: {MIN: 2, MAX: 100}, QUANTITY: {MIN: 1, MAX: 25}},
 			CATEGORY: {LENGTH: {MIN: 2, MAX: 100}, QUANTITY: {MIN: 1, MAX: 5}}
+		},
+		RECIPE_REVIEW: {
+			STARS: {MIN: 1, MAX: 5, DEFAULT: 0},
+			COMMENT: {LENGTH: {MAX: 1000}}
 		}
 	}
 } as const;

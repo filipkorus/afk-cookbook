@@ -1,10 +1,10 @@
 import React from 'react';
-import RecipeWallCard, {RecipeWithAuthor} from '@/components/recipe/RecipeWallCard.tsx';
 import {v4 as uuidv4} from 'uuid';
-import {Pagination, Typography} from '@mui/material';
+import {Box, Pagination, Typography} from '@mui/material';
+import RecipeCard, {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard.tsx';
 
 type RecipeListPaginationProps = {
-	recipes: Array<RecipeWithAuthor>,
+	recipes: Array<RecipeWithCategoriesIngredientsAuthorAndStars>,
 	disablePagination?: boolean,
 	page: number,
 	count: number,
@@ -22,9 +22,14 @@ const RecipeListPagination: React.FC<RecipeListPaginationProps> = ({
 		<div>
 			{recipes.length === 0 &&
              <Typography variant="h6" m={2}>
-	              Nothing to show...
-				 </Typography>}
-			{recipes.map(recipe => <RecipeWallCard recipe={recipe} key={uuidv4()}/>)}
+                 Nothing to show...
+             </Typography>
+			}
+
+			{recipes.map(recipe => <Box mt={1} mb={3} key={uuidv4()}>
+					<RecipeCard recipe={recipe} wallCard/>
+				</Box>
+			)}
 
 			<Pagination
 				disabled={disablePagination}
