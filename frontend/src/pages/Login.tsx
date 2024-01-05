@@ -50,49 +50,43 @@ const Login = () => {
 	};
 
 	return <>
-		<Container maxWidth={false} style={{
-			height: '95vh',
-			overflow: 'hidden'
-		}}
-		>
+		<Container maxWidth="xs" style={{ height: '95vh', overflow: 'hidden' }}>
 			{loading && currentUser == null && (
-				<LinearProgress
-					color="secondary"
-					sx={{
-						position: 'absolute',
-						top: 0,
-						left: 0,
-						width: '100%',
-					}}
-				/>)
-			}
+				<LinearProgress color="secondary" sx={{ position: 'absolute', top: 0, left: 0, width: '100%' }} />
+			)}
 
-			<Grid
-				container
-				spacing={0}
-				direction="column"
-				alignItems="center"
-				justifyContent="center"
-				height="100%"
-			>
+			<Grid container direction="column" alignItems="center" justifyContent="center" height="100%">
 				<div style={{ textAlign: 'center' }}>
-				<img className="logo-animation" src={logo} alt="logo"/>
-					<p style={{ justifySelf: 'center', fontFamily: 'Brush Script MT, cursive', fontSize: '32px',color:'#960f5a' }}>
-						--------------CookBook--------------
+					<img className="logo-animation" src={logo} alt="logo" style={{ width: '80%', maxWidth: '200px' }} />
+					<p style={{ fontFamily: 'Brush Script MT, cursive', fontSize: '24px', color: '#960f5a' }}>
+						----------CookBook----------
 					</p>
 				</div>
-				<Box marginTop='2rem'>
-					{
-						(!loading && currentUser == null) &&
-                   <GoogleLogin onSuccess={responseMessage} onError={errorMessage}/>
-					}
+				<Box marginTop="2rem">
+					{!loading && currentUser == null && <GoogleLogin onSuccess={responseMessage} onError={errorMessage} />}
 				</Box>
 
-				{(error && currentUser == null) && <Box marginTop='2rem'>
-                <Alert severity="error">{error}</Alert>
-            </Box>}
-
+				{error && currentUser == null && (
+					<Box marginTop="2rem">
+						<Alert severity="error">{error}</Alert>
+					</Box>
+				)}
 			</Grid>
+
+			{currentUser == null && (
+				<>
+					<Snackbar open={isLoggedOut}>
+						<Alert severity="success" onClose={() => setIsLoggedOut(false)}>
+							Logged out successfully
+						</Alert>
+					</Snackbar>
+					<Snackbar open={isKickedOut}>
+						<Alert severity="warning" onClose={() => setIsKickedOut(false)}>
+							Please log in
+						</Alert>
+					</Snackbar>
+				</>
+			)}
 		</Container>
 
 		{currentUser == null && <>
