@@ -57,19 +57,18 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 			.finally(() => setLoading(false));
 	}, [openReviews]);
 
-	useEffect(() => {
+	const refreshStars = () => {
 		if (stars != null) return;
-		if (currentUserReview == null) return;
 
 		getStars(recipe.id)
 			.then(({stars}) => setStars(stars))
 			.catch(error => {
 				if (!(error instanceof AxiosError)) return;
 			});
-	}, [currentUserReview]);
+	};
 
 	return <>
-		<Grid container spacing={2} mb={1}>
+		<Grid container spacing={2}>
 			<Grid item xs={12} md={6}>
 				<ReviewStars stars={stars ?? recipe.stars}/>
 			</Grid>
@@ -84,40 +83,43 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 					Reviews
 				</Button>
 			</Grid>
+
+			{openReviews && reviews &&
+             <>
+                 <Grid item xs={12}>
+                     <Divider color="gray"/>
+
+                     <Box p={3}>
+								{recipe.author.id !== currentUser.id &&
+                            <Box m={1}>
+										 {currentUserReview ?
+											 <ReviewComment review={currentUserReview}/> :
+											 <ReviewCreate recipeId={recipe.id} onCreate={(review) => {
+												 setCurrentUserReview(review);
+												 refreshStars();
+											 }}/>
+										 }
+										 {reviews.length > 0 && <Divider sx={{margin: '1rem'}}/>}
+                            </Box>
+								}
+
+								{reviews.length === 0 && currentUser.id === recipe.author.id &&
+                            <Typography variant="subtitle1">No reviews yet...</Typography>
+								}
+
+								{reviews.map((review, idx) =>
+									<Box key={uuidv4()} m={1}>
+										<ReviewComment review={review}/>
+										{idx !== reviews.length - 1 && <Divider sx={{margin: '1rem'}}/>}
+									</Box>
+								)}
+                     </Box>
+                 </Grid>
+             </>
+			}
 		</Grid>
 
-		{openReviews && reviews &&
-          <>
-				 <Divider color="gray"/>
 
-              <Grid container spacing={2} justifyContent="center" m={1}>
-                  <Grid item xs={12} md={12}>
-							{recipe.author.id !== currentUser.id &&
-                         <>
-									 {currentUserReview ?
-										 <Box>
-											 <ReviewComment review={currentUserReview}/>
-										 </Box> :
-										 <Box>
-											 <ReviewCreate recipeId={recipe.id} onCreate={setCurrentUserReview}/>
-										 </Box>
-									 }
-	                         {reviews.length > 0 && <Divider sx={{marginTop: '1rem'}}/>}
-                         </>
-							}
-
-							{reviews.length === 0 && currentUser.id === recipe.author.id && <Typography variant="subtitle1">No reviews yet...</Typography>}
-
-							{reviews.map((review, idx) =>
-								<Box key={uuidv4()}>
-									<ReviewComment review={review}/>
-									{idx !== reviews.length - 1 && <Divider sx={{margin: '1rem'}}/>}
-								</Box>
-							)}
-                  </Grid>
-              </Grid>
-          </>
-		}
 	</>;
 };
 

@@ -1,9 +1,7 @@
 import React, {useState} from 'react';
 import {z} from 'zod';
-import RecipeToAdd from '@/types/RecipeToAdd';
 import useForm from '@/hooks/useForm';
-import Textarea from '@mui/joy/Textarea';
-import {Alert, Box, Button, Card, CardContent, FormGroup, Rating, TextField, Typography} from '@mui/material';
+import {Alert, Box, Button, FormGroup, Rating, TextField, Typography} from '@mui/material';
 import theme from '@/theme';
 import {AxiosError} from 'axios';
 import {createReview} from '@/api/review';
@@ -13,7 +11,7 @@ import Review from '@/types/Review.ts';
 
 type ReviewCreateProps = {
 	recipeId: number;
-	onCreate?: React.Dispatch<React.SetStateAction<Review | null>>
+	onCreate?: (currentUserComment: Review) => any
 };
 
 const ReviewCreate: React.FC<ReviewCreateProps> = ({recipeId, onCreate}) => {
