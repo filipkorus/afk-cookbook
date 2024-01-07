@@ -174,14 +174,11 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 
 	const recipesWithAuthorsCategoriesAndIngredients = recipes
 		.map((recipe, idx) => {
-			const {user, ...rest} = recipe;
-
 			const categoriesToShape = categories[idx];
 			const ingredientsToShape = ingredients[idx];
 
 			return {
-				...rest,
-				author: user,
+				...recipe,
 				stars: stars[idx],
 				categories: categoriesToShape == null ? null : _shapeCategoriesArray(categoriesToShape),
 				ingredients: ingredientsToShape == null ? null : _shapeIngredientsArray(ingredientsToShape)

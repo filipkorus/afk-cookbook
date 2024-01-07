@@ -1,11 +1,7 @@
 import logger from '../../../utils/logger';
-import {PrismaClient, RecipeReview, User} from '@prisma/client';
+import {PrismaClient, RecipeReview} from '@prisma/client';
 
 const prisma = new PrismaClient();
-
-type FullRecipeReviewObject = RecipeReview & {
-	author?: Omit<User, 'email' | 'banned'>
-};
 
 /**
  * Returns boolean indicating whether user with userId has already submitted review for recipe with recipeId.
@@ -38,16 +34,16 @@ export const hasUserAlreadyReviewedThisRecipe = async ({userId, recipeId}: {
  * @param comment {string} Review's text. Optional - empty string is the default value.
  * @param userId {number} User's ID.
  * @param recipeId {number} Recipe's ID.
- * @returns {Promise<FullRecipeReviewObject | null> | null} FullRecipeReviewObject or null if error.
+ * @returns { Promise<RecipeReview | null>} RecipeReview object or null if error.
  */
 export const createReview = async ({stars, comment = '', userId, recipeId}: {
 	stars: number,
 	comment?: string,
 	userId: number,
 	recipeId: number
-}): Promise<FullRecipeReviewObject | null> => {
+}): Promise<RecipeReview | null> => {
 	try {
-		const review = await prisma.recipeReview.create({
+		return prisma.recipeReview.create({
 			data: {
 				stars,
 				comment,
@@ -55,7 +51,7 @@ export const createReview = async ({stars, comment = '', userId, recipeId}: {
 				userId
 			},
 			select: {
-				user: {
+				author: {
 					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
 				},
 				id: true,
@@ -66,12 +62,6 @@ export const createReview = async ({stars, comment = '', userId, recipeId}: {
 				createdAt: true
 			}
 		});
-
-		const {user, ...rest} = review;
-		return {
-			...rest,
-			author: user
-		};
 	} catch (error) {
 		logger.error(error);
 		return null;
@@ -117,22 +107,22 @@ export const getAverageStars = async (recipeId: number): Promise<{ average: numb
  * @param limit {number} Pagination parameter.
  * @param recipeId {number} Recipe's ID.
  * @param userIdToExcludeReviewFrom {number} User's ID whose review you want not to include.
- * @returns {Promise<Array<FullRecipeReviewObject> | null>} Array of FullRecipeReviewObject or null if error.
+ * @returns {Promise<Array<RecipeReview> | null> | null} Array of FullRecipeReviewObject or null if error.
  */
-export const getReviewsByRecipeId = async ({startIndex, limit, recipeId, userIdToExcludeReviewFrom}: {
+export const getReviewsByRecipeId = ({startIndex, limit, recipeId, userIdToExcludeReviewFrom}: {
 	startIndex?: number;
 	limit?: number;
 	recipeId: number;
 	userIdToExcludeReviewFrom?: number;
-}): Promise<Array<FullRecipeReviewObject> | null> => {
+}): Promise<Array<RecipeReview> | null> | null => {
 	try {
-		const reviews = await prisma.recipeReview.findMany({
+		return prisma.recipeReview.findMany({
 			where: {recipeId, NOT: {userId: userIdToExcludeReviewFrom}},
 			orderBy: {createdAt: 'desc'},
 			skip: startIndex,
 			take: limit,
 			select: {
-				user: {
+				author: {
 					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
 				},
 				id: true,
@@ -142,13 +132,6 @@ export const getReviewsByRecipeId = async ({startIndex, limit, recipeId, userIdT
 				userId: true,
 				createdAt: true
 			}
-		});
-
-		return reviews.map(({user, ...review}) => {
-			return {
-				...review,
-				author: user
-			};
 		});
 	} catch (error) {
 		logger.error(error);
@@ -161,17 +144,17 @@ export const getReviewsByRecipeId = async ({startIndex, limit, recipeId, userIdT
  *
  * @param userId {number} User's ID.
  * @param recipeId {number} Recipe's ID.
- * @returns {Promise<FullRecipeReviewObject | null>} FullRecipeReviewObject or null if review of given user was not found or error occurred.
+ * @returns {Promise<RecipeReview | null> | null} RecipeReview object with author or null if review of given user was not found or error occurred.
  */
-export const getReviewByRecipeIdAndUserId = async ({userId, recipeId}: {
+export const getReviewByRecipeIdAndUserId = ({userId, recipeId}: {
 	userId: number;
 	recipeId: number;
-}): Promise<FullRecipeReviewObject | null> => {
+}): Promise<RecipeReview | null> | null => {
 	try {
-		const review= await prisma.recipeReview.findFirst({
+		return prisma.recipeReview.findFirst({
 			where: {userId, recipeId},
 			select: {
-				user: {
+				author: {
 					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
 				},
 				id: true,
@@ -182,17 +165,6 @@ export const getReviewByRecipeIdAndUserId = async ({userId, recipeId}: {
 				createdAt: true
 			}
 		});
-
-		if (review == null) {
-			return null;
-		}
-
-		const {user, ...rest} = review;
-
-		return {
-			...rest,
-			author: user
-		};
 	} catch (error) {
 		logger.error(error);
 		return null;
@@ -203,6 +175,7 @@ export const getReviewByRecipeIdAndUserId = async ({userId, recipeId}: {
  * Returns number of reviews for given recipe in the database.
  *
  * @param recipeId {number} Recipe's ID.
+ * @param userIdToExcludeReviewFrom {number} User's ID whose reviews you want to exclude from result.
  * @returns {Promise<number> | null} Number of reviews for given recipe in the database.
  */
 export const getAllReviewsByRecipeIdCount = ({recipeId, userIdToExcludeReviewFrom}: {

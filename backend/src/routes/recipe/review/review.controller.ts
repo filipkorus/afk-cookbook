@@ -50,7 +50,7 @@ export const GetReviewsByRecipeIdHandler = async (req: Request, res: Response) =
 	}
 
 	// check if current user can view this recipe
-	if (recipe.userId !== res.locals.user.id && !recipe.isPublic) {
+	if (recipe.author.id !== res.locals.user.id && !recipe.isPublic) {
 		return NOT_FOUND(res, `Recipe with ID of ${recipeId} not found.`);
 	}
 
@@ -107,7 +107,7 @@ export const GetStarsByRecipeIdHandler = async (req: Request, res: Response) => 
 	}
 
 	// check if current user can view this recipe
-	if (recipe.userId !== res.locals.user.id && !recipe.isPublic) {
+	if (recipe.author.id !== res.locals.user.id && !recipe.isPublic) {
 		return NOT_FOUND(res, `Recipe with ID of ${recipeId} not found.`);
 	}
 
@@ -143,11 +143,11 @@ export const CreateReviewHandler = async (req: Request, res: Response) => {
 
 	// check if recipe with recipeId exists and is available
 	const recipe = await getRecipeById(+recipeId);
-	if (recipe == null || (recipe.userId != res.locals.user.id && !recipe.isPublic)) {
+	if (recipe == null || (recipe.author.id != res.locals.user.id && !recipe.isPublic)) {
 		return NOT_FOUND(res, `Recipe with ID = ${recipeId} does not exists`);
 	}
 
-	if (recipe.userId === res.locals.user.id) {
+	if (recipe.author.id === res.locals.user.id) {
 		return CONFLICT(res, `You cannot review your own recipe`);
 	}
 

@@ -3,10 +3,9 @@ import {
 	Recipe,
 	Ingredient,
 	Category,
-	PrismaPromise, User
+	PrismaPromise
 } from '@prisma/client';
 import logger from '../../utils/logger';
-import {getUserById} from '../user/user.service';
 
 const prisma = new PrismaClient();
 
@@ -17,19 +16,12 @@ type RecipeToAdd =
 	categories: Array<string>
 };
 
-type RecipeWithoutCoords = Omit<Recipe, 'latitude' | 'longitude'>;
-type FullRecipeObject = RecipeWithoutCoords & {
-	ingredients: Array<Ingredient>,
-	categories: Array<Category>,
-	author?: Omit<User, 'email' | 'banned'>
-};
-
 /**
  * Save recipe in the database.
  *
  * @returns Recipe object with arrays of Ingredient objects and Category objects from database or null if error.
  */
-export const createRecipe = async (recipe: RecipeToAdd): Promise<FullRecipeObject | null> => {
+export const createRecipe = async (recipe: RecipeToAdd) => {
 
 	let result = null;
 	try {
@@ -101,14 +93,17 @@ export const createRecipe = async (recipe: RecipeToAdd): Promise<FullRecipeObjec
 /**
  * Returns Recipe object with given recipe's ID.
  *
- * @returns {Promise<RecipeWithoutCoords|null>|null} RecipeWithoutCoords object or null if error.
+ * @returns Recipe object with author or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeById = (recipeId: number): Promise<RecipeWithoutCoords | null> | null => {
+export const getRecipeById = (recipeId: number) => {
 	try {
 		return prisma.recipe.findFirst({
 			where: {id: recipeId},
 			select: {
+				author: {
+					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
+				},
 				id: true,
 				title: true,
 				cookingTimeMinutes: true,
@@ -152,7 +147,7 @@ export const getPublicRecipesWithAuthors = ({startIndex, limit, currentLoggedUse
 			skip: startIndex,
 			take: limit,
 			select: {
-				user: {
+				author: {
 					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
 				},
 				id: true,
@@ -231,7 +226,7 @@ export const getRecipesByUserIdWithAuthors = ({startIndex, limit, includePublic,
 			skip: startIndex,
 			take: limit,
 			select: {
-				user: {
+				author: {
 					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
 				},
 				id: true,
@@ -286,10 +281,10 @@ export const getRecipesByUserIdCount = ({includePublic, includePrivate, userId}:
 /**
  * Returns Recipe object with arrays of Category objects and Ingredient objects.
  *
- * @returns {Promise<Recipe|null>} Recipe object or null if error.
+ * @returns {} Recipe object or null if error.
  * @param recipeId {number} Recipe's ID.
  */
-export const getRecipeFullObjectById = async (recipeId: number): Promise<FullRecipeObject | null> => {
+export const getRecipeFullObjectById = async (recipeId: number) => {
 	try {
 		const recipe = await getRecipeById(recipeId);
 
@@ -297,21 +292,17 @@ export const getRecipeFullObjectById = async (recipeId: number): Promise<FullRec
 			return null;
 		}
 
-		const authorPromise = getUserById(recipe.userId);
 		const categoriesPromise = getRecipeCategoriesByRecipeId(recipeId);
 		const ingredientsPromise = getRecipeIngredientsByRecipeId(recipeId);
 
-		const [author, categories, ingredients] = await Promise.all([authorPromise, categoriesPromise, ingredientsPromise]);
+		const [categories, ingredients] = await Promise.all([categoriesPromise, ingredientsPromise]);
 
-		if (author == null || categories == null || ingredients == null) {
+		if (categories == null || ingredients == null) {
 			return null;
 		}
 
-		const {email, banned, ...authorWithOutUselessInfo} = author;
-
 		return {
 			...recipe,
-			author: authorWithOutUselessInfo,
 			categories: _shapeCategoriesArray(categories),
 			ingredients: _shapeIngredientsArray(ingredients)
 		};
