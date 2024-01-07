@@ -1,8 +1,8 @@
 import React, {useContext, useState, useEffect, createContext, ReactNode} from 'react';
 import api from '@/api';
-import User from '@/types/User.ts';
-import {login, logout} from '@/api/auth.ts';
-import {getCurrentlyLoggedUser} from '@/api/user.ts';
+import User from '@/types/User';
+import {login, logout} from '@/api/auth';
+import {getCurrentlyLoggedUser} from '@/api/user';
 import {AxiosError} from 'axios';
 
 type SuccessOrErrorMessage = {
@@ -80,10 +80,10 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
 			.then(res => {
 				if (res.data?.user) {
 					setCurrentUser(res.data?.user as User);
-					setLoading(false);
 				}
 			})
-			.catch(error => setLoading(false));
+			.catch(error => {})
+			.finally(() => setLoading(false));
 	}, []);
 
 	return <AuthContext.Provider value={{

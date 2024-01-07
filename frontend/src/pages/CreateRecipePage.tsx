@@ -46,7 +46,7 @@ const CreateRecipePage: React.FC = ({}) => {
 			<Grid container spacing={2} key={idx}>
 				<Grid item xs={10}>
 					<TextField
-						label={`Category ${idx + 1}`}
+						label={`Category ${idx + 1}` + (category.length > 0 ? ` (${category.length}/${config.APP.RECIPE.CATEGORY.LENGTH.MAX})` : '')}
 						value={category}
 						onChange={(e) => handleCategoryChange(idx, e.target.value)}
 						disabled={loading}
@@ -102,7 +102,7 @@ const CreateRecipePage: React.FC = ({}) => {
 			<Grid container spacing={2} key={idx}>
 				<Grid item xs={10}>
 					<TextField
-						label={`Ingredient ${idx + 1}`}
+						label={`Ingredient ${idx + 1}` + (ingredient.length > 0 ? ` (${ingredient.length}/${config.APP.RECIPE.INGREDIENT.LENGTH.MAX})` : '')}
 						value={ingredient}
 						onChange={(e) => handleIngredientChange(idx, e.target.value)}
 						disabled={loading}
@@ -190,7 +190,7 @@ const CreateRecipePage: React.FC = ({}) => {
 					<TextField
 						variant="outlined"
 						required
-						label="Title"
+						label={"Title" + (formData.title.length > 0 ? ` (${formData.title.length}/${config.APP.RECIPE.TITLE.LENGTH.MAX})` : '')}
 						name="title"
 						error={fieldError('title') != null}
 						helperText={fieldError('title')?.message}
@@ -252,7 +252,7 @@ const CreateRecipePage: React.FC = ({}) => {
 					<TextField
 						type="text"
 						variant='outlined'
-						label="Location"
+						label={"Location" + (formData.location?.length ?? 0 > 0 ? ` (${formData.location?.length}/${config.APP.RECIPE.LOCATION.LENGTH.MAX})` : '')}
 						name="location"
 						onChange={handleInputChange}
 						value={formData.location}

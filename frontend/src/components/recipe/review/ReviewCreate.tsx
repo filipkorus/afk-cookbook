@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
 import {z} from 'zod';
-import useForm from '@/hooks/useForm';
+import useForm from '@/hooks/useForm.ts';
 import {Alert, Box, Button, FormGroup, Rating, TextField, Typography} from '@mui/material';
 import theme from '@/theme';
 import {AxiosError} from 'axios';
-import {createReview} from '@/api/review';
-import ReviewToAdd from '@/types/ReviewToAdd';
+import {createReview} from '@/api/review.ts';
+import ReviewToAdd from '@/types/ReviewToAdd.ts';
 import config from '@/config';
 import Review from '@/types/Review.ts';
 
@@ -85,7 +85,7 @@ const ReviewCreate: React.FC<ReviewCreateProps> = ({recipeId, onCreate}) => {
 				multiline
 				maxRows={5}
 				variant="outlined"
-				label="Comment"
+				label={'Comment' + (formData.comment.length > 0 ? ` (${formData.comment.length}/${config.APP.RECIPE_REVIEW.COMMENT.LENGTH.MAX})` : '')}
 				name="comment"
 				error={fieldError('comment') != null}
 				helperText={fieldError('comment')?.message}

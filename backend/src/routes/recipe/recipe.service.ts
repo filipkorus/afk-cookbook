@@ -1,11 +1,6 @@
-import {
-	PrismaClient,
-	Recipe,
-	Ingredient,
-	Category,
-	PrismaPromise
-} from '@prisma/client';
+import {Category, Ingredient, PrismaClient, PrismaPromise, Recipe} from '@prisma/client';
 import logger from '../../utils/logger';
+import {SearchRecipeBy} from './recipe.controller';
 
 const prisma = new PrismaClient();
 
@@ -39,9 +34,9 @@ export const createRecipe = async (recipe: RecipeToAdd) => {
 			// find or create ingredient
 			const createIngredientsPromises = ingredients.map(ingredientName => {
 				return transactionalPrisma.ingredient.upsert({
-					where: {name: ingredientName},
+					where: {name: ingredientName.toLowerCase()},
 					update: {},
-					create: {name: ingredientName}
+					create: {name: ingredientName.toLowerCase()}
 				});
 			});
 			const createIngredientsResults = await Promise.all(createIngredientsPromises);
@@ -57,9 +52,9 @@ export const createRecipe = async (recipe: RecipeToAdd) => {
 			// find or create category
 			const createCategoriesPromises = categories.map(categoryName => {
 				return transactionalPrisma.category.upsert({
-					where: {name: categoryName},
+					where: {name: categoryName.toLowerCase()},
 					update: {},
-					create: {name: categoryName}
+					create: {name: categoryName.toLowerCase()}
 				});
 			});
 			const createCategoriesResults = await Promise.all(createCategoriesPromises);
@@ -126,7 +121,7 @@ export const getRecipeById = (recipeId: number) => {
  * @param startIndex {number} Pagination parameter.
  * @param limit {number} Pagination parameter.
  * @param currentLoggedUserId {number} User ID of currently logged user.
- * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
+ * @param doNotIncludeOwnRecipes {boolean} Boolean indicating excluding recipes of current logged user from result.
  * @returns Array of RecipeWithoutCoords objects or null if error.
  */
 export const getPublicRecipesWithAuthors = ({startIndex, limit, currentLoggedUserId, doNotIncludeOwnRecipes}: {
@@ -170,7 +165,7 @@ export const getPublicRecipesWithAuthors = ({startIndex, limit, currentLoggedUse
  * Returns number of recipes in the database.
  *
  * @param currentLoggedUserId {number} User ID of currently logged user.
- * @param doNotIncludeOwnRecipes {boolean} Boolean indication user want to exclude from result.
+ * @param doNotIncludeOwnRecipes {boolean} Boolean indicating excluding recipes of current logged user from result.
  * @returns {Promise<number> | null} Number of recipes in the database.
  */
 export const getPublicRecipesCount = ({currentLoggedUserId, doNotIncludeOwnRecipes}: {
@@ -356,4 +351,96 @@ export const getRecipeCategoriesByRecipeId = (recipeId: number): PrismaPromise<A
 
 export const _shapeCategoriesArray = (recipeCategoriesWithCategory: Array<CategoryWithCategoryField>) => {
 	return recipeCategoriesWithCategory.map(recipeCategory => recipeCategory.category);
+};
+
+/**
+ * Returns array of Recipe objects with given ingredient.
+ *
+ * @param startIndex {number} Pagination parameter.
+ * @param limit {number} Pagination parameter.
+ * @param searchBy {SearchRecipeBy} Indicating searching type.
+ * @param name {string} Name of ingredient/category.
+ * @param currentLoggedUserId {number} User ID of currently logged user.
+ * @param doNotIncludeOwnRecipes {boolean} Boolean indicating excluding recipes of current logged user from result.
+ * @returns {} Array of Recipe objects with given ingredient/category or null if error.
+ */
+export const getPublicRecipesByIngredientOrCategoryName = async ({startIndex, limit, searchBy, name, currentLoggedUserId, doNotIncludeOwnRecipes}: {
+	startIndex?: number,
+	limit?: number,
+	searchBy: SearchRecipeBy,
+	name: string,
+	currentLoggedUserId: number,
+	doNotIncludeOwnRecipes?: boolean
+}) => {
+	try {
+		// Find the ingredient or category by name
+		const ingredientOrCategory = searchBy === 'ingredient' ?
+			(await prisma.ingredient.findUnique({where: {name: name.toLowerCase()}, select: {id: true}})) :
+			(await prisma.category.findUnique({where: {name: name.toLowerCase()}, select: {id: true}}));
+
+		if (ingredientOrCategory == null) {
+			// not found
+			return null;
+		}
+
+		// Find recipes containing the given ingredient or category ID
+		return prisma.recipe.findMany({
+			where: {
+				RecipeIngredient: searchBy === 'ingredient' ? {some: {ingredientId: ingredientOrCategory.id}} : undefined,
+				RecipeCategory: searchBy === 'category' ? {some: {categoryId: ingredientOrCategory.id}} : undefined,
+				isPublic: true,
+				userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}
+			},
+			orderBy: {createdAt: 'desc'},
+			skip: startIndex,
+			take: limit,
+			select: {id: true},
+		});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
+};
+
+/**
+ * Returns count of recipes with given ingredient.
+ *
+ * @param searchBy {SearchRecipeBy} Indicating searching type.
+ * @param name {string} Name of ingredient/category.
+ * @param currentLoggedUserId {number} User ID of currently logged user.
+ * @param doNotIncludeOwnRecipes {boolean} Boolean indicating excluding recipes of current logged user from result.
+ * @returns {Promise<number | null>} Returns count of recipes with given ingredient/category or null if error.
+ */
+export const getPublicRecipesByIngredientOrCategoryNameCount = async ({searchBy, name, currentLoggedUserId, doNotIncludeOwnRecipes}: {
+	startIndex?: number,
+	limit?: number,
+	searchBy: SearchRecipeBy,
+	name: string,
+	currentLoggedUserId: number,
+	doNotIncludeOwnRecipes?: boolean
+}): Promise<number | null> => {
+	try {
+		// Find the ingredient or category by name
+		const ingredientOrCategory = searchBy === 'ingredient' ?
+			(await prisma.ingredient.findUnique({where: {name: name.toLowerCase()}, select: {id: true}})) :
+			(await prisma.category.findUnique({where: {name: name.toLowerCase()}, select: {id: true}}));
+
+		if (ingredientOrCategory == null) {
+			// not found
+			return null;
+		}
+
+		// Find recipes containing the given ingredient ID
+		return prisma.recipe.count({
+			where: {
+				RecipeIngredient: searchBy === 'ingredient' ? {some: {ingredientId: ingredientOrCategory.id}} : undefined,
+				RecipeCategory: searchBy === 'category' ? {some: {categoryId: ingredientOrCategory.id}} : undefined,
+				isPublic: true,
+				userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}
+			},
+		});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
 };

@@ -1,6 +1,5 @@
-import api from '@/api/index.ts';
-import Recipe from '@/types/Recipe.ts';
-import RecipeToAdd from '@/types/RecipeToAdd.ts';
+import api from '@/api';
+import Recipe from '@/types/Recipe';
 
 type RecipeToAddWithCategoriesAndIngredients = Pick<Recipe, 'title' | 'cookingTimeMinutes' | 'description'> & {
 	isPublic?: boolean;
@@ -11,21 +10,11 @@ type RecipeToAddWithCategoriesAndIngredients = Pick<Recipe, 'title' | 'cookingTi
 	ingredients: Array<string>
 };
 
-export const createRecipe = async (recipe: RecipeToAddWithCategoriesAndIngredients) => {
-	const {data} = await api.post('/recipe', {...recipe});
-	return data;
-}
-export const getRecipeById = async (id: number) => {
-	const {data} = await api.get(`/recipe/${id}`);
-	return data;
-}
-
-export const getRecipes = async ({page, limit, excludeMyRecipes}: {
-	page?: number,
-	limit?: number,
-	excludeMyRecipes?: boolean
-} = {}) => {
-	let params = `excludeMyRecipes=${excludeMyRecipes ?? false}`;
+const getPaginationUrlParams = ({page, limit}: {
+	page: number,
+	limit: number
+}) => {
+	let params = '';
 	if (page == null) {
 		if (limit != null) {
 			params += `&limit=${limit}`;
@@ -38,7 +27,48 @@ export const getRecipes = async ({page, limit, excludeMyRecipes}: {
 		}
 	}
 
-	const {data} = await api.get(`/recipe?${params}`);
+	return params;
+};
+
+export const createRecipe = async (recipe: RecipeToAddWithCategoriesAndIngredients) => {
+	const {data} = await api.post('/recipe', {...recipe});
+	return data;
+}
+export const getRecipeById = async (id: number) => {
+	const {data} = await api.get(`/recipe/${id}`);
+	return data;
+}
+
+export const getRecipes = async ({page, limit, excludeMyRecipes, categoryName, ingredientName}: {
+	page: number,
+	limit: number,
+	excludeMyRecipes?: boolean,
+	categoryName?: string,
+	ingredientName?: string,
+}) => {
+	if (categoryName != null && ingredientName != null) {
+		throw new Error('categoryName and ingredientName cannot be defined at once');
+	}
+
+	const params = `excludeMyRecipes=${excludeMyRecipes ?? false}` + getPaginationUrlParams({page, limit});
+
+	const getURL = () => {
+		if (categoryName == null && ingredientName == null) {
+			return `/recipe?${params}`;
+		}
+
+		if (categoryName != null) {
+			return `/recipe/category/${categoryName}?${params}`;
+		}
+
+		if (ingredientName != null) {
+			return `/recipe/ingredient/${ingredientName}?${params}`;
+		}
+
+		return `/recipe?${params}`;
+	};
+
+	const {data} = await api.get(getURL());
 
 	return data;
 };

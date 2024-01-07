@@ -58,9 +58,10 @@ export const LoginHandler = async (req: Request, res: Response) => {
 		}
 	}
 
-	await updateNameAndPicture(profile?.name, profile?.picture, profile.email); // update name in db if changed
-
-	const user = await getUserByEmail(profile.email);
+	const [user, _] = await Promise.all([
+		getUserByEmail(profile.email),
+		updateNameAndPicture(profile?.name, profile?.picture, profile.email) // update name in db if changed
+	]);
 
 	if (user == null) {
 		return UNAUTHORIZED(res);

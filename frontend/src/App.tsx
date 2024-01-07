@@ -1,14 +1,14 @@
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
-import PrivateRoute from '@/components/routing/PrivateRoute.tsx';
+import PrivateRoute from '@/components/routing/PrivateRoute';
 
-import LoginPage from '@/pages/LoginPage.tsx';
-import NotFound from '@/pages/errors/NotFound.tsx';
-import DrawerView from '@/pages/DrawerView.tsx';
-import RecipeWallPage from '@/pages/RecipeWallPage.tsx';
-import CreateRecipePage from '@/pages/CreateRecipePage.tsx';
-import RecipesOfUserPage from '@/pages/RecipesOfUserPage.tsx';
-import RecipePage from './pages/RecipePage';
+import LoginPage from '@/pages/LoginPage';
+import NotFound from '@/pages/errors/NotFound';
+import DrawerView from '@/pages/DrawerView';
+import RecipeWallPage from '@/pages/RecipeWallPage';
+import CreateRecipePage from '@/pages/CreateRecipePage';
+import RecipesOfUserPage from '@/pages/RecipesOfUserPage';
+import RecipePage from '@/pages/RecipePage';
 
 const App = () => {
 	return <Router>
@@ -16,28 +16,40 @@ const App = () => {
 			<Route path="/" element={<PrivateRoute/>}>
 				<Route path="recipe">
 					<Route path="" element={
-						<DrawerView>
+						<DrawerView pageTitle="Create recipe">
 							<CreateRecipePage/>
 						</DrawerView>
 					}/>
 
 					<Route path=":id" element={
-						<DrawerView>
+						<DrawerView pageTitle="Recipe">
 							<RecipePage/>
 						</DrawerView>
 					}/>
 
 					<Route path="user">
 						<Route path=":id" element={
-							<DrawerView>
+							<DrawerView pageTitle="User profile">
 								<RecipesOfUserPage/>
 							</DrawerView>
 						}/>
 					</Route>
 				</Route>
 
+				<Route path="ingredient/:name" element={
+					<DrawerView pageTitle="Ingredient wall">
+						<RecipeWallPage wallType="ingredient"/>
+					</DrawerView>
+				}/>
+
+				<Route path="category/:name" element={
+					<DrawerView pageTitle="Category wall">
+						<RecipeWallPage wallType="category"/>
+					</DrawerView>
+				}/>
+
 				<Route path="" element={
-					<DrawerView>
+					<DrawerView pageTitle="Recipe wall">
 						<RecipeWallPage/>
 					</DrawerView>
 				}/>

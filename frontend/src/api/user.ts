@@ -1,3 +1,3 @@
-import api from '@/api/index.ts';
+import api from '@/api';
 
 export const getCurrentlyLoggedUser = () => api.get('/user');
