@@ -47,9 +47,7 @@ const RecipesOfUserPage: React.FC = () => {
 
 				console.error(error);
 
-				const {totalPages} = error?.response?.data;
-
-				if (totalPages === 0) {
+				if (error?.response?.data?.totalPages === 0) {
 					setRecipes([]);
 					setTotalPages(0);
 

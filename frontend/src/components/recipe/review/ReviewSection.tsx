@@ -1,16 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import {Box, Button, Divider, Grid, Typography} from '@mui/material';
-import ReviewStars from '@/components/recipe/review/ReviewStars.tsx';
+import ReviewStars from '@/components/recipe/review/ReviewStars';
 import theme from '@/theme';
-import {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard.tsx';
-import ReviewComment from '@/components/recipe/review/ReviewComment.tsx';
+import {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard';
+import ReviewComment from '@/components/recipe/review/ReviewComment';
 import Review from '@/types/Review.ts';
-import {getReviews, getStars} from '@/api/review.ts';
-import {v4 as uuidv4} from 'uuid';
+import {getReviews, getStars} from '@/api/review';
 import {AxiosError} from 'axios';
-import ReviewCreate from '@/components/recipe/review/ReviewCreate.tsx';
-import {useAuth} from '@/context/AuthContext.tsx';
-import Stars from '@/types/Stars.ts';
+import ReviewCreate from '@/components/recipe/review/ReviewCreate';
+import {useAuth} from '@/context/AuthContext';
+import Stars from '@/types/Stars';
+import ReviewCommentListPagination from '@/components/recipe/review/ReviewCommentListPagination';
+import {useLocation, useNavigate} from 'react-router-dom';
+import config from '@/config';
 
 type ReviewSectionProps = {
 	recipe: RecipeWithCategoriesIngredientsAuthorAndStars;
@@ -24,6 +26,8 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 
 	const [reviews, setReviews] = useState<Array<Review> | null>(null);
 	const [currentUserReview, setCurrentUserReview] = useState<Review | null>(null);
+	const [totalPages, setTotalPages] = useState<number>(0);
+	const [currentPage, setCurrentPage] = useState<number>(1);
 
 	const [stars, setStars] = useState<Stars | null>(null);
 
@@ -32,7 +36,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 	}
 
 	useEffect(() => {
-		if (reviews != null) return;
 		if (loading) return;
 		if (!openReviews) return;
 
@@ -40,11 +43,11 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 
 		getReviews({
 			recipeId: recipe.id,
-			page: 1,
-			limit: 3
+			page: currentPage,
+			limit: config.APP.PAGINATION.RECIPES_PER_PAGE
 		})
-			.then(({reviews, currentUserReview}) => {
-				// setTotalPages(res.totalPages);
+			.then(({reviews, currentUserReview, totalPages}) => {
+				setTotalPages(totalPages);
 				setReviews(reviews);
 				setCurrentUserReview(currentUserReview);
 			})
@@ -53,9 +56,20 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 
 				setReviews([]);
 				setCurrentUserReview(error?.response?.data?.currentUserReview ?? null);
+
+				if (error?.response?.data?.totalPages === 0) {
+					setReviews([]);
+					setTotalPages(0);
+
+					return;
+				}
+
+				if (currentPage > totalPages) {
+					setCurrentPage(totalPages);
+				}
 			})
 			.finally(() => setLoading(false));
-	}, [openReviews]);
+	}, [openReviews, currentPage]);
 
 	const refreshStars = () => {
 		if (stars != null) return;
@@ -66,6 +80,10 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 				if (!(error instanceof AxiosError)) return;
 			});
 	};
+
+	const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
+		setCurrentPage(page);
+	}
 
 	return <>
 		<Grid container spacing={2}>
@@ -107,12 +125,15 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
                             <Typography variant="subtitle1">No reviews yet...</Typography>
 								}
 
-								{reviews.map((review, idx) =>
-									<Box key={uuidv4()} m={1}>
-										<ReviewComment review={review}/>
-										{idx !== reviews.length - 1 && <Divider sx={{margin: '1rem'}}/>}
-									</Box>
-								)}
+                         <Box m={1}>
+                             <ReviewCommentListPagination
+                                 reviews={reviews}
+                                 page={currentPage}
+                                 count={Math.ceil(totalPages)}
+                                 disablePagination={loading}
+                                 handlePageChange={handlePageChange}
+                             />
+                         </Box>
                      </Box>
                  </Grid>
              </>
