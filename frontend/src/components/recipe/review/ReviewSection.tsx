@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {Box, Button, Divider, Grid, Typography} from '@mui/material';
-import ReviewStars from '@/components/recipe/ReviewStars.tsx';
+import ReviewStars from '@/components/recipe/review/ReviewStars.tsx';
 import theme from '@/theme';
 import {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard.tsx';
-import ReviewComment from '@/components/recipe/ReviewComment.tsx';
+import ReviewComment from '@/components/recipe/review/ReviewComment.tsx';
 import Review from '@/types/Review.ts';
 import {getReviews, getStars} from '@/api/review.ts';
 import {v4 as uuidv4} from 'uuid';
 import {AxiosError} from 'axios';
-import ReviewCreate from '@/components/recipe/ReviewCreate.tsx';
+import ReviewCreate from '@/components/recipe/review/ReviewCreate.tsx';
 import {useAuth} from '@/context/AuthContext.tsx';
 import Stars from '@/types/Stars.ts';
 

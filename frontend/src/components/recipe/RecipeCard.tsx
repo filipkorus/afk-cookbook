@@ -16,7 +16,7 @@ import Category from '@/types/Category.ts';
 import Ingredient from '@/types/Ingredient.ts';
 import theme from '@/theme';
 import Stars from '@/types/Stars.ts';
-import ReviewSection from '@/components/recipe/ReviewSection.tsx';
+import ReviewSection from '@/components/recipe/review/ReviewSection.tsx';
 import RouterLink from '@/components/routing/RouterLink.tsx';
 import LockIcon from '@mui/icons-material/Lock';
 import {useNavigate, useParams} from 'react-router-dom';

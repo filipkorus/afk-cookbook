@@ -1,6 +1,6 @@
 import React from 'react';
 import {Grid, Rating, Typography} from '@mui/material';
-import Stars from '@/types/Stars';
+import Stars from '@/types/Stars.ts';
 
 type ReviewStarsProps = {
 	stars: Stars | null;

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Avatar, Grid, Rating, Typography} from '@mui/material';
-import Review from '@/types/Review';
+import Review from '@/types/Review.ts';
 import {useNavigate} from 'react-router-dom';
 import timeSince from '@/utils/date/timeSince.ts';
 import {useAuth} from '@/context/AuthContext.tsx';
