@@ -19,7 +19,9 @@ import {
 	getRecipeCategoriesByRecipeId,
 	getRecipeIngredientsByRecipeId,
 	_shapeCategoriesArray,
-	_shapeIngredientsArray
+	_shapeIngredientsArray,
+	getRecipeById,
+	getPublicRecipesByIngredientOrCategoryNameCount, getPublicRecipesByIngredientOrCategoryName
 } from './recipe.service';
 import config from '../../../config';
 import {getAverageStars} from './review/review.service';
@@ -147,20 +149,31 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 	});
 
 	// check if userId is defined => fetch recipes for given userId otherwise fetch all public recipes
-	const recipes = userId != null ?
-		(await getRecipesByUserIdWithAuthors({
+	const [
+		recipes,
+		totalRecipes
+	] = await Promise.all([
+		userId != null ? getRecipesByUserIdWithAuthors({
 			startIndex,
 			limit,
 			userId: +userId,
 			includePublic: validatedReqQuery.data?.includePublic === 'true',
 			includePrivate: validatedReqQuery.data?.includePrivate === 'true' && res.locals.user.id === +userId // currently logged user can only get public recipes of other user
-		})) :
-		(await getPublicRecipesWithAuthors({
+		}) : getPublicRecipesWithAuthors({
 			startIndex,
 			limit,
 			currentLoggedUserId: res.locals.user.id,
 			doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true'
-		}));
+		}),
+		userId != null ? getRecipesByUserIdCount({
+			userId: +userId,
+			includePublic: validatedReqQuery.data?.includePublic === 'true',
+			includePrivate: validatedReqQuery.data?.includePrivate === 'true' && res.locals.user.id === +userId // currently logged user can only get public recipes of other user
+		}) : getPublicRecipesCount({
+			currentLoggedUserId: res.locals.user.id,
+			doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true'
+		})
+	]);
 
 	if (recipes == null) {
 		return NOT_FOUND(res, 'no recipes found');
@@ -172,7 +185,7 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 
 	const [stars, categories, ingredients] = await Promise.all([starsPromises, categoriesPromises, ingredientsPromises]);
 
-	const recipesWithAuthorsCategoriesAndIngredients = recipes
+	const recipesWithAuthorsCategoriesIngredientsAndStars = recipes
 		.map((recipe, idx) => {
 			const categoriesToShape = categories[idx];
 			const ingredientsToShape = ingredients[idx];
@@ -185,16 +198,6 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 			};
 		});
 
-	const totalRecipes = userId != null ?
-		(await getRecipesByUserIdCount({
-			userId: +userId,
-			includePublic: validatedReqQuery.data?.includePublic === 'true',
-			includePrivate: validatedReqQuery.data?.includePrivate === 'true' && res.locals.user.id === +userId // currently logged user can only get public recipes of other user
-		})) :
-		(await getPublicRecipesCount({
-			currentLoggedUserId: res.locals.user.id,
-			doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true'
-		}));
 	const totalPages = Math.ceil((totalRecipes ?? 0) / limit);
 
 	const responseData = {
@@ -202,7 +205,7 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 		limit,
 		totalRecipes,
 		totalPages,
-		recipes: recipesWithAuthorsCategoriesAndIngredients
+		recipes: recipesWithAuthorsCategoriesIngredientsAndStars
 	};
 
 	if (page > totalPages) {
@@ -210,4 +213,105 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 	}
 
 	return SUCCESS(res, 'Paginated recipes fetched successfully', responseData);
+};
+
+export type SearchRecipeBy = 'ingredient' | 'category';
+export const GetRecipesByIngredientOrCategoryNameNameHandler = (searchBy: SearchRecipeBy) => {
+	return async (req: Request, res: Response) => {
+		const {name} = req.params;
+
+		const ValidationSchema = z.object({
+			page: z.string().regex(/^\d+$/).optional(),
+			limit: z.string().regex(/^\d+$/).optional(),
+			excludeMyRecipes: z.string().optional()
+		});
+
+		const validatedReqQuery = validateObject(ValidationSchema, req.query);
+
+		if (validatedReqQuery.data?.page == null && validatedReqQuery.data?.limit == null) {
+			return BAD_REQUEST(res, 'page number OR maximum of recipes for page param is required');
+		}
+
+		if (name == null) {
+			return BAD_REQUEST(res, 'Invalid or missing \'name\' param');
+		}
+
+		const {startIndex, page, limit} = paginationParams({
+			page: validatedReqQuery.data.page,
+			limit: validatedReqQuery.data.limit
+		});
+
+		// fetch recipes with given ingredient/category
+		const [
+			recipesWithIdFieldOnly,
+			totalRecipes
+		] = await Promise.all([
+			getPublicRecipesByIngredientOrCategoryName({
+				startIndex,
+				limit,
+				name,
+				searchBy,
+				doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true',
+				currentLoggedUserId: res.locals.user.id
+			}),
+			getPublicRecipesByIngredientOrCategoryNameCount({
+				startIndex,
+				limit,
+				name,
+				searchBy,
+				doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true',
+				currentLoggedUserId: res.locals.user.id
+			})
+		]);
+
+		if (recipesWithIdFieldOnly == null) {
+			return NOT_FOUND(res, 'no recipes found');
+		}
+
+		const recipesPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getRecipeById(recipe.id)));
+		const starsPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getAverageStars(recipe.id)));
+		const categoriesPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getRecipeCategoriesByRecipeId(recipe.id)));
+		const ingredientsPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getRecipeIngredientsByRecipeId(recipe.id)));
+
+		const [
+			recipes,
+			stars,
+			categories,
+			ingredients,
+		] = await Promise.all([
+			recipesPromises,
+			starsPromises,
+			categoriesPromises,
+			ingredientsPromises
+		]);
+
+		const recipesWithAuthorsCategoriesIngredientsAndStars = recipes
+			.map((recipe, idx) => {
+				const categoriesToShape = categories[idx];
+				const ingredientsToShape = ingredients[idx];
+
+				return {
+					...recipe,
+					stars: stars[idx],
+					categories: categoriesToShape == null ? null : _shapeCategoriesArray(categoriesToShape),
+					ingredients: ingredientsToShape == null ? null : _shapeIngredientsArray(ingredientsToShape)
+				};
+			});
+
+		const totalPages = Math.ceil((totalRecipes ?? 0) / limit);
+
+		const responseData = {
+			page,
+			limit,
+			totalRecipes,
+			totalPages,
+			recipes: recipesWithAuthorsCategoriesIngredientsAndStars
+		};
+
+		if (page > totalPages) {
+			return BAD_REQUEST(res, 'No more pages', responseData);
+		}
+
+		return SUCCESS(res, 'Paginated recipes fetched successfully', responseData);
+	};
 };

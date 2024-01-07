@@ -1,4 +1,4 @@
-import api from '@/api/index.ts';
+import api from '@/api';
 
 export const login = (credential: string) => api.post('/auth/login', {credential}, {withCredentials: true});
 

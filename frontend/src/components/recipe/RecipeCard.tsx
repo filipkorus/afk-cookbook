@@ -79,7 +79,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({recipe, wallCard}) => {
 							onClick={authorProfileOnClick}
 							title={authorProfileClickTitle}
 						>
-							{recipe.author.name} | {timeSince(recipe.createdAt)} ago
+							{recipe.author.id === currentUser.id ? 'You' : recipe.author.name} | {timeSince(recipe.createdAt)} ago
 						</Typography>
 					</Grid>
 					{!recipe.isPublic &&
@@ -100,16 +100,29 @@ const RecipeCard: React.FC<RecipeCardProps> = ({recipe, wallCard}) => {
 			<Typography color="gray">
 				{recipe.categories.length > 1 ? 'Categories: ' : 'Category: '}
 				{recipe.categories
-					.map(category => category.name.charAt(0).toUpperCase() + category.name.slice(1))
-					.join(', ')
+					.map((category, idx) => <span
+						key={idx}
+						style={{cursor: 'pointer'}}
+						onClick={() => navigate(`/category/${encodeURIComponent(category.name.toLowerCase())}`)}
+						title={`Click to view recipes with category '${category.name.charAt(0).toUpperCase() + category.name.slice(1)}'`}
+					>
+						{category.name.charAt(0).toUpperCase() + category.name.slice(1) + `${idx === recipe.categories.length - 1 ? '' : ','} `}
+					</span>)
 				}
 			</Typography>
 
 			{wallCard && <Typography color="gray">
              Ingredient{recipe.ingredients.length > 1 && 's'}:
-				{' ' + recipe.ingredients
-					.map(ingredient => ingredient.name.charAt(0).toUpperCase() + ingredient.name.slice(1))
-					.join(', ')
+				{' '}
+				{recipe.ingredients
+					.map((ingredient, idx) => <span
+						key={idx}
+						style={{cursor: 'pointer'}}
+						onClick={() => navigate(`/ingredient/${encodeURIComponent(ingredient.name.toLowerCase())}`)}
+						title={`Click to view recipes with ingredient '${ingredient.name.charAt(0).toUpperCase() + ingredient.name.slice(1)}'`}
+					>
+						{ingredient.name.charAt(0).toUpperCase() + ingredient.name.slice(1) + `${idx === recipe.ingredients.length - 1 ? '' : ','} `}
+					</span>)
 				}
          </Typography>}
 
