@@ -11,7 +11,6 @@ import ReviewCreate from '@/components/recipe/review/ReviewCreate';
 import {useAuth} from '@/context/AuthContext';
 import Stars from '@/types/Stars';
 import ReviewCommentListPagination from '@/components/recipe/review/ReviewCommentListPagination';
-import {useLocation, useNavigate} from 'react-router-dom';
 import config from '@/config';
 
 type ReviewSectionProps = {
