@@ -96,7 +96,7 @@ const ReviewCreate: React.FC<ReviewCreateProps> = ({recipeId, onCreate}) => {
 				}}
 				value={formData.comment}
 				fullWidth
-				sx={{mb: 2, mt: 1}}
+				sx={{mb: 2, mt: 2}}
 			/>
 		</FormGroup>
 
