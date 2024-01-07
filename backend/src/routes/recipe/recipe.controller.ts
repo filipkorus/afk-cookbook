@@ -64,8 +64,8 @@ export const CreateRecipeHandler = async (req: Request, res: Response) => {
 				.max(config.APP.RECIPE.INGREDIENT.LENGTH.MAX, `ingredient name should not be longer than ${config.APP.RECIPE.INGREDIENT.LENGTH.MAX} characters`),
 			{required_error: 'list of ingredients is required'}
 		)
-			.min(config.APP.RECIPE.CATEGORY.QUANTITY.MIN, `ingredients list should consist of at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} item`)
-			.max(config.APP.RECIPE.CATEGORY.QUANTITY.MAX, `ingredients list should not be over ${config.APP.RECIPE.CATEGORY.QUANTITY.MAX} elements long`),
+			.min(config.APP.RECIPE.INGREDIENT.QUANTITY.MIN, `ingredients list should consist of at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} item`)
+			.max(config.APP.RECIPE.INGREDIENT.QUANTITY.MAX, `ingredients list should not be over ${config.APP.RECIPE.CATEGORY.QUANTITY.MAX} elements long`),
 		categories: z.array(
 			z.string()
 				.trim()

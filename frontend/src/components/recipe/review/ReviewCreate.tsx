@@ -85,7 +85,7 @@ const ReviewCreate: React.FC<ReviewCreateProps> = ({recipeId, onCreate}) => {
 				multiline
 				maxRows={5}
 				variant="outlined"
-				label={'Comment' + (formData.comment.length > 0 ? ` (${formData.comment.length}/${config.APP.RECIPE_REVIEW.COMMENT.LENGTH.MAX})` : '')}
+				label={'Comment' + (formData.comment.trim().length > 0 ? ` (${formData.comment.trim().length}/${config.APP.RECIPE_REVIEW.COMMENT.LENGTH.MAX})` : '')}
 				name="comment"
 				error={fieldError('comment') != null}
 				helperText={fieldError('comment')?.message}
