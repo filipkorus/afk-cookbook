@@ -17,7 +17,7 @@ const config = {
 			MAX_LIMIT_MAX: 25
 		},
 		RECIPE: {
-			TITLE: {LENGTH: {MIN: 0, MAX: 255}},
+			TITLE: {LENGTH: {MIN: 5, MAX: 255}},
 			DESCRIPTION: {LENGTH: {MIN: 10}},
 			LOCATION: {LENGTH: {MAX: 255}},
 			LATITUDE: {MIN: -90, MAX: 90},

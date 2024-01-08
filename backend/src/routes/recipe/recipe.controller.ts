@@ -21,62 +21,68 @@ import {
 	_shapeCategoriesArray,
 	_shapeIngredientsArray,
 	getRecipeById,
-	getPublicRecipesByIngredientOrCategoryNameCount, getPublicRecipesByIngredientOrCategoryName
+	getPublicRecipesByIngredientOrCategoryNameCount,
+	getPublicRecipesByIngredientOrCategoryName,
+	updateRecipe,
+	deleteRecipe
 } from './recipe.service';
 import config from '../../../config';
 import {getAverageStars} from './review/review.service';
 import paginationParams from '../../utils/pagination/paginationParams';
 
+const recipeValidationSchemaObject = {
+	title: z
+		.string({required_error: 'title is required'})
+		.trim()
+		.min(config.APP.RECIPE.TITLE.LENGTH.MIN, `title must be longer than ${config.APP.RECIPE.TITLE.LENGTH.MIN} characters`)
+		.max(config.APP.RECIPE.TITLE.LENGTH.MAX, `title must be shorter than ${config.APP.RECIPE.TITLE.LENGTH.MAX} characters`),
+	cookingTimeMinutes: z
+		.number({required_error: 'cooking time is required'})
+		.min(1, 'cooking time must be positive'),
+	description: z
+		.string({required_error: 'description is required'})
+		.trim()
+		.min(config.APP.RECIPE.DESCRIPTION.LENGTH.MIN, `description should be longer than ${config.APP.RECIPE.DESCRIPTION.LENGTH.MIN} characters`),
+	isPublic: z.boolean().default(false),
+	location: z
+		.string()
+		.trim()
+		.max(config.APP.RECIPE.LOCATION.LENGTH.MAX, `location must be shorter than ${config.APP.RECIPE.LOCATION.LENGTH.MAX} characters`)
+		.or(z.null()).default(null), // could be null
+	latitude: z
+		.number()
+		.min(config.APP.RECIPE.LATITUDE.MIN)
+		.max(config.APP.RECIPE.LATITUDE.MAX)
+		.or(z.null()).default(null), // could be null
+	longitude: z
+		.number()
+		.min(config.APP.RECIPE.LONGITUDE.MIN)
+		.max(config.APP.RECIPE.LONGITUDE.MAX)
+		.or(z.null()).default(null), // could be null
+	ingredients: z.array(
+		z.string()
+			.trim()
+			.toLowerCase()
+			.min(config.APP.RECIPE.INGREDIENT.LENGTH.MIN, `ingredient name should be longer than ${config.APP.RECIPE.INGREDIENT.LENGTH.MIN} characters`)
+			.max(config.APP.RECIPE.INGREDIENT.LENGTH.MAX, `ingredient name should not be longer than ${config.APP.RECIPE.INGREDIENT.LENGTH.MAX} characters`),
+		{required_error: 'list of ingredients is required'}
+	)
+		.min(config.APP.RECIPE.INGREDIENT.QUANTITY.MIN, `ingredients list should consist of at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} item`)
+		.max(config.APP.RECIPE.INGREDIENT.QUANTITY.MAX, `ingredients list should not be over ${config.APP.RECIPE.CATEGORY.QUANTITY.MAX} elements long`),
+	categories: z.array(
+		z.string()
+			.trim()
+			.toLowerCase()
+			.min(config.APP.RECIPE.CATEGORY.LENGTH.MIN, `category name should be longer than ${config.APP.RECIPE.CATEGORY.LENGTH.MIN} characters`)
+			.max(config.APP.RECIPE.CATEGORY.LENGTH.MAX, `category name should not be longer than ${config.APP.RECIPE.CATEGORY.LENGTH.MAX} characters`),
+		{required_error: `at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} categor${config.APP.RECIPE.CATEGORY.QUANTITY.MIN === 1 ? 'y is' : 'ies are'} required`}
+	)
+		.min(config.APP.RECIPE.CATEGORY.QUANTITY.MIN, `at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} categor${config.APP.RECIPE.CATEGORY.QUANTITY.MIN === 1 ? 'y is' : 'ies are'} required`)
+		.max(config.APP.RECIPE.CATEGORY.QUANTITY.MAX, `maximum ${config.APP.RECIPE.CATEGORY.QUANTITY.MAX} categories are allowed`)
+};
+
 export const CreateRecipeHandler = async (req: Request, res: Response) => {
-	const ValidationSchema = z.object({
-		title: z
-			.string({required_error: 'title is required'})
-			.trim()
-			.max(config.APP.RECIPE.TITLE.LENGTH.MAX, `title must be shorter than ${config.APP.RECIPE.TITLE.LENGTH.MAX} characters`),
-		cookingTimeMinutes: z
-			.number({required_error: 'cooking time is required'})
-			.min(1, 'cooking time must be positive'),
-		description: z
-			.string({required_error: 'description is required'})
-			.trim()
-			.min(config.APP.RECIPE.DESCRIPTION.LENGTH.MIN, `description should be longer than ${config.APP.RECIPE.DESCRIPTION.LENGTH.MIN} characters`),
-		isPublic: z.boolean().default(false),
-		location: z
-			.string()
-			.trim()
-			.max(config.APP.RECIPE.LOCATION.LENGTH.MAX, `location must be shorter than ${config.APP.RECIPE.LOCATION.LENGTH.MAX} characters`)
-			.or(z.null()).default(null), // could be null
-		latitude: z
-			.number()
-			.min(config.APP.RECIPE.LATITUDE.MIN)
-			.max(config.APP.RECIPE.LATITUDE.MAX)
-			.or(z.null()).default(null), // could be null
-		longitude: z
-			.number()
-			.min(config.APP.RECIPE.LONGITUDE.MIN)
-			.max(config.APP.RECIPE.LONGITUDE.MAX)
-			.or(z.null()).default(null), // could be null
-		ingredients: z.array(
-			z.string()
-				.trim()
-				.toLowerCase()
-				.min(config.APP.RECIPE.INGREDIENT.LENGTH.MIN, `ingredient name should be longer than ${config.APP.RECIPE.INGREDIENT.LENGTH.MIN} characters`)
-				.max(config.APP.RECIPE.INGREDIENT.LENGTH.MAX, `ingredient name should not be longer than ${config.APP.RECIPE.INGREDIENT.LENGTH.MAX} characters`),
-			{required_error: 'list of ingredients is required'}
-		)
-			.min(config.APP.RECIPE.INGREDIENT.QUANTITY.MIN, `ingredients list should consist of at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} item`)
-			.max(config.APP.RECIPE.INGREDIENT.QUANTITY.MAX, `ingredients list should not be over ${config.APP.RECIPE.CATEGORY.QUANTITY.MAX} elements long`),
-		categories: z.array(
-			z.string()
-				.trim()
-				.toLowerCase()
-				.min(config.APP.RECIPE.CATEGORY.LENGTH.MIN, `category name should be longer than ${config.APP.RECIPE.CATEGORY.LENGTH.MIN} characters`)
-				.max(config.APP.RECIPE.CATEGORY.LENGTH.MAX, `category name should not be longer than ${config.APP.RECIPE.CATEGORY.LENGTH.MAX} characters`),
-			{required_error: `at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} categor${config.APP.RECIPE.CATEGORY.QUANTITY.MIN === 1 ? 'y is' : 'ies are'} required`}
-		)
-			.min(config.APP.RECIPE.CATEGORY.QUANTITY.MIN, `at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} categor${config.APP.RECIPE.CATEGORY.QUANTITY.MIN === 1 ? 'y is' : 'ies are'} required`)
-			.max(config.APP.RECIPE.CATEGORY.QUANTITY.MAX, `maximum ${config.APP.RECIPE.CATEGORY.QUANTITY.MAX} categories are allowed`)
-	});
+	const ValidationSchema = z.object(recipeValidationSchemaObject);
 
 	const validatedReqBody = validateObject(ValidationSchema, req.body);
 
@@ -119,6 +125,62 @@ export const GetRecipeByIdHandler = async (req: Request, res: Response) => {
 			stars
 		}
 	});
+};
+
+export const UpdateRecipeHandler = async (req: Request, res: Response) => {
+	const {id} = req.params;
+
+	if (id == null || !Number.isInteger(Number(id))) {
+		return BAD_REQUEST(res, 'Invalid or missing \'id\' param');
+	}
+
+	const recipe = await getRecipeById(+id);
+
+	// check if recipe exists and current user is its author
+	if (recipe == null || recipe.userId !== res.locals.user.id) {
+		return BAD_REQUEST(res, `Recipe with ID = '${id}' does not exist`);
+	}
+
+	const ValidationSchema = z.object(recipeValidationSchemaObject);
+
+	const validatedReqBody = validateObject(ValidationSchema, req.body);
+
+	if (validatedReqBody.data == null) {
+		return MISSING_BODY_FIELDS(res, validatedReqBody.errors);
+	}
+
+	const updatedRecipe = await updateRecipe(+id,{
+		...validatedReqBody.data,
+		userId: res.locals.user.id
+	});
+
+	if (updatedRecipe == null) {
+		return SERVER_ERROR(res, 'Something went wrong! Recipe has not been updated');
+	}
+
+	return SUCCESS(res, 'Recipe updated successfully', {recipe: updatedRecipe});
+};
+
+export const DeleteRecipeHandler = async (req: Request, res: Response) => {
+	const {id} = req.params;
+
+	if (id == null || !Number.isInteger(Number(id))) {
+		return BAD_REQUEST(res, 'Invalid or missing \'id\' param');
+	}
+
+	const recipe = await getRecipeById(+id);
+
+	// check if recipe exists and current user is its author
+	if (recipe == null || recipe.userId !== res.locals.user.id) {
+		return BAD_REQUEST(res, `Recipe with ID = '${id}' does not exist`);
+	}
+
+	const deletedRecipe = await deleteRecipe(+id);
+	if (deletedRecipe == null) {
+		return SERVER_ERROR(res, 'Something went wrong! Recipe has not been deleted');
+	}
+
+	return SUCCESS(res, 'Recipe deleted successfully', {recipe: deletedRecipe});
 };
 
 export const GetRecipesHandler = async (req: Request, res: Response) => {

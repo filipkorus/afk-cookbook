@@ -4,7 +4,7 @@ import {SearchRecipeBy} from './recipe.controller';
 
 const prisma = new PrismaClient();
 
-type RecipeToAdd =
+type RecipeToAddOrUpdate =
 	Omit<Recipe, 'id' | 'createdAt'>
 	& {
 	ingredients: Array<string>,
@@ -16,7 +16,7 @@ type RecipeToAdd =
  *
  * @returns Recipe object with arrays of Ingredient objects and Category objects from database or null if error.
  */
-export const createRecipe = async (recipe: RecipeToAdd) => {
+export const createRecipe = async (recipe: RecipeToAddOrUpdate) => {
 
 	let result = null;
 	try {
@@ -83,6 +83,99 @@ export const createRecipe = async (recipe: RecipeToAdd) => {
 	}
 
 	return result;
+};
+
+/**
+ * Save updated recipe in the database.
+ *
+ * @returns Recipe object with arrays of Ingredient objects and Category objects from database or null if error.
+ */
+export const updateRecipe = async (recipeId: number, recipeToUpdate: RecipeToAddOrUpdate) => {
+	let result = null;
+	try {
+		await prisma.$transaction(async (transactionalPrisma) => {
+			const {ingredients, categories, ...recipeToUpdateObject} = recipeToUpdate;
+
+			const existingRecipe = await transactionalPrisma.recipe.findUnique({
+				where: {id: recipeId},
+			});
+
+			if (!existingRecipe) {
+				throw new Error('Recipe not found');
+			}
+
+			const [updatedRecipeEntry, _, __] = await Promise.all([
+				transactionalPrisma.recipe.update({where: {id: recipeId}, data: recipeToUpdateObject}),
+				transactionalPrisma.recipeIngredient.deleteMany({where: {recipeId}}), // delete all recipe <-> category AND
+				transactionalPrisma.recipeCategory.deleteMany({where: {recipeId}}) // recipe <-> ingredient associations
+			]);
+
+			// find or create ingredient
+			const createIngredientsPromises = ingredients.map(ingredientName => {
+				return transactionalPrisma.ingredient.upsert({
+					where: {name: ingredientName.toLowerCase()},
+					update: {},
+					create: {name: ingredientName.toLowerCase()}
+				});
+			});
+			const createIngredientsResults = await Promise.all(createIngredientsPromises);
+			const createdIngredientsIds = createIngredientsResults.map(ingredient => ingredient.id);
+
+			// associate ingredient with recipe
+			const recipeIngredientPromises = createdIngredientsIds.map(ingredientId => {
+				return transactionalPrisma.recipeIngredient.create({
+					data: {recipeId, ingredientId}
+				});
+			});
+
+			// find or create category
+			const createCategoriesPromises = categories.map(categoryName => {
+				return transactionalPrisma.category.upsert({
+					where: {name: categoryName.toLowerCase()},
+					update: {},
+					create: {name: categoryName.toLowerCase()}
+				});
+			});
+			const createCategoriesResults = await Promise.all(createCategoriesPromises);
+			const createdCategoriesIds = createCategoriesResults.map(category => category.id);
+
+			// associate category with recipe
+			const recipeCategoriesPromises = createdCategoriesIds.map(categoryId => {
+				return transactionalPrisma.recipeCategory.create({
+					data: {recipeId, categoryId}
+				});
+			});
+
+			await Promise.all([...recipeIngredientPromises, ...recipeCategoriesPromises]);
+
+			result = {
+				ingredients: createIngredientsResults,
+				categories: createCategoriesResults,
+				...updatedRecipeEntry
+			};
+		});
+	} catch (error) {
+		logger.error(error);
+		result = null;
+	} finally {
+		await prisma.$disconnect();
+	}
+
+	return result;
+};
+
+/**
+ * Removes recipe and its data from the database.
+ *
+ * @param recipeId Recipe's ID to be removed.
+ */
+export const deleteRecipe = (recipeId: number) => {
+	try {
+		return prisma.recipe.delete({where: {id: recipeId}});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
 };
 
 /**
@@ -364,7 +457,14 @@ export const _shapeCategoriesArray = (recipeCategoriesWithCategory: Array<Catego
  * @param doNotIncludeOwnRecipes {boolean} Boolean indicating excluding recipes of current logged user from result.
  * @returns {} Array of Recipe objects with given ingredient/category or null if error.
  */
-export const getPublicRecipesByIngredientOrCategoryName = async ({startIndex, limit, searchBy, name, currentLoggedUserId, doNotIncludeOwnRecipes}: {
+export const getPublicRecipesByIngredientOrCategoryName = async ({
+	                                                                 startIndex,
+	                                                                 limit,
+	                                                                 searchBy,
+	                                                                 name,
+	                                                                 currentLoggedUserId,
+	                                                                 doNotIncludeOwnRecipes
+                                                                 }: {
 	startIndex?: number,
 	limit?: number,
 	searchBy: SearchRecipeBy,
@@ -411,7 +511,12 @@ export const getPublicRecipesByIngredientOrCategoryName = async ({startIndex, li
  * @param doNotIncludeOwnRecipes {boolean} Boolean indicating excluding recipes of current logged user from result.
  * @returns {Promise<number | null>} Returns count of recipes with given ingredient/category or null if error.
  */
-export const getPublicRecipesByIngredientOrCategoryNameCount = async ({searchBy, name, currentLoggedUserId, doNotIncludeOwnRecipes}: {
+export const getPublicRecipesByIngredientOrCategoryNameCount = async ({
+	                                                                      searchBy,
+	                                                                      name,
+	                                                                      currentLoggedUserId,
+	                                                                      doNotIncludeOwnRecipes
+                                                                      }: {
 	startIndex?: number,
 	limit?: number,
 	searchBy: SearchRecipeBy,
