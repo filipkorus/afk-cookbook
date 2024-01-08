@@ -24,7 +24,7 @@ import {
 	getPublicRecipesByIngredientOrCategoryNameCount,
 	getPublicRecipesByIngredientOrCategoryName,
 	updateRecipe,
-	deleteRecipe
+	deleteRecipe, getPublicRecipesByIngredientOrCategoryNamesList, getPublicRecipesByIngredientOrCategoryNamesListCount
 } from './recipe.service';
 import config from '../../../config';
 import {getAverageStars} from './review/review.service';
@@ -64,7 +64,8 @@ const recipeValidationSchemaObject = {
 			.trim()
 			.toLowerCase()
 			.min(config.APP.RECIPE.INGREDIENT.LENGTH.MIN, `ingredient name should be longer than ${config.APP.RECIPE.INGREDIENT.LENGTH.MIN} characters`)
-			.max(config.APP.RECIPE.INGREDIENT.LENGTH.MAX, `ingredient name should not be longer than ${config.APP.RECIPE.INGREDIENT.LENGTH.MAX} characters`),
+			.max(config.APP.RECIPE.INGREDIENT.LENGTH.MAX, `ingredient name should not be longer than ${config.APP.RECIPE.INGREDIENT.LENGTH.MAX} characters`)
+			.refine(ingredient => !ingredient.includes(','), 'Ingredient name should not contain commas'),
 		{required_error: 'list of ingredients is required'}
 	)
 		.min(config.APP.RECIPE.INGREDIENT.QUANTITY.MIN, `ingredients list should consist of at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} item`)
@@ -74,7 +75,8 @@ const recipeValidationSchemaObject = {
 			.trim()
 			.toLowerCase()
 			.min(config.APP.RECIPE.CATEGORY.LENGTH.MIN, `category name should be longer than ${config.APP.RECIPE.CATEGORY.LENGTH.MIN} characters`)
-			.max(config.APP.RECIPE.CATEGORY.LENGTH.MAX, `category name should not be longer than ${config.APP.RECIPE.CATEGORY.LENGTH.MAX} characters`),
+			.max(config.APP.RECIPE.CATEGORY.LENGTH.MAX, `category name should not be longer than ${config.APP.RECIPE.CATEGORY.LENGTH.MAX} characters`)
+			.refine(category => !category.includes(','), 'Category name should not contain commas'),
 		{required_error: `at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} categor${config.APP.RECIPE.CATEGORY.QUANTITY.MIN === 1 ? 'y is' : 'ies are'} required`}
 	)
 		.min(config.APP.RECIPE.CATEGORY.QUANTITY.MIN, `at least ${config.APP.RECIPE.CATEGORY.QUANTITY.MIN} categor${config.APP.RECIPE.CATEGORY.QUANTITY.MIN === 1 ? 'y is' : 'ies are'} required`)
@@ -149,7 +151,7 @@ export const UpdateRecipeHandler = async (req: Request, res: Response) => {
 		return MISSING_BODY_FIELDS(res, validatedReqBody.errors);
 	}
 
-	const updatedRecipe = await updateRecipe(+id,{
+	const updatedRecipe = await updateRecipe(+id, {
 		...validatedReqBody.data,
 		userId: res.locals.user.id
 	});
@@ -278,7 +280,7 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 };
 
 export type SearchRecipeBy = 'ingredient' | 'category';
-export const GetRecipesByIngredientOrCategoryNameNameHandler = (searchBy: SearchRecipeBy) => {
+export const GetRecipesByIngredientOrCategoryNameHandler = (searchBy: SearchRecipeBy) => {
 	return async (req: Request, res: Response) => {
 		const {name} = req.params;
 
@@ -320,6 +322,114 @@ export const GetRecipesByIngredientOrCategoryNameNameHandler = (searchBy: Search
 				startIndex,
 				limit,
 				name,
+				searchBy,
+				doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true',
+				currentLoggedUserId: res.locals.user.id
+			})
+		]);
+
+		if (recipesWithIdFieldOnly == null) {
+			return NOT_FOUND(res, 'no recipes found');
+		}
+
+		const recipesPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getRecipeById(recipe.id)));
+		const starsPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getAverageStars(recipe.id)));
+		const categoriesPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getRecipeCategoriesByRecipeId(recipe.id)));
+		const ingredientsPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getRecipeIngredientsByRecipeId(recipe.id)));
+
+		const [
+			recipes,
+			stars,
+			categories,
+			ingredients,
+		] = await Promise.all([
+			recipesPromises,
+			starsPromises,
+			categoriesPromises,
+			ingredientsPromises
+		]);
+
+		const recipesWithAuthorsCategoriesIngredientsAndStars = recipes
+			.map((recipe, idx) => {
+				const categoriesToShape = categories[idx];
+				const ingredientsToShape = ingredients[idx];
+
+				return {
+					...recipe,
+					stars: stars[idx],
+					categories: categoriesToShape == null ? null : _shapeCategoriesArray(categoriesToShape),
+					ingredients: ingredientsToShape == null ? null : _shapeIngredientsArray(ingredientsToShape)
+				};
+			});
+
+		const totalPages = Math.ceil((totalRecipes ?? 0) / limit);
+
+		const responseData = {
+			page,
+			limit,
+			totalRecipes,
+			totalPages,
+			recipes: recipesWithAuthorsCategoriesIngredientsAndStars
+		};
+
+		if (page > totalPages) {
+			return BAD_REQUEST(res, 'No more pages', responseData);
+		}
+
+		return SUCCESS(res, 'Paginated recipes fetched successfully', responseData);
+	};
+};
+
+export const GetRecipesByIngredientOrCategoryNamesListHandler = (searchBy: SearchRecipeBy) => {
+	return async (req: Request, res: Response) => {
+		const {commaSeparatedNames} = req.params;
+
+		if (commaSeparatedNames == null) {
+			return BAD_REQUEST(res, 'Missing \'commaSeparatedNames\' param');
+		}
+
+		const names = commaSeparatedNames
+			.split(',')
+			.map(name => name.trim())
+			.filter(name => name !== '');
+
+		const minimumListLength = 2;
+		if (names.length < minimumListLength) {
+			return BAD_REQUEST(res, `Invalid 'commaSeparatedNames' param. Minimum amount of names is ${minimumListLength}.`);
+		}
+
+		const ValidationSchema = z.object({
+			page: z.string().regex(/^\d+$/).optional(),
+			limit: z.string().regex(/^\d+$/).optional(),
+			excludeMyRecipes: z.string().optional()
+		});
+
+		const validatedReqQuery = validateObject(ValidationSchema, req.query);
+
+		if (validatedReqQuery.data?.page == null && validatedReqQuery.data?.limit == null) {
+			return BAD_REQUEST(res, 'page number OR maximum of recipes for page param is required');
+		}
+
+		const {startIndex, page, limit} = paginationParams({
+			page: validatedReqQuery.data.page,
+			limit: validatedReqQuery.data.limit
+		});
+
+		// fetch recipes with given ingredient/category names
+		const [
+			recipesWithIdFieldOnly,
+			totalRecipes
+		] = await Promise.all([
+			getPublicRecipesByIngredientOrCategoryNamesList({
+				startIndex,
+				limit,
+				names,
+				searchBy,
+				doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true',
+				currentLoggedUserId: res.locals.user.id
+			}),
+			getPublicRecipesByIngredientOrCategoryNamesListCount({
+				names,
 				searchBy,
 				doNotIncludeOwnRecipes: validatedReqQuery.data?.excludeMyRecipes === 'true',
 				currentLoggedUserId: res.locals.user.id

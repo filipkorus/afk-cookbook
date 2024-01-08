@@ -32,6 +32,12 @@ const CreateRecipePage: React.FC = ({}) => {
 		location: ''
 	});
 
+	const preventCommasInsideInput = (event: React.KeyboardEvent) => {
+		if (event.key === ',') {
+			event.preventDefault();
+		}
+	};
+
 	const {
 		items: categories,
 		handleItemChange: handleCategoryChange,
@@ -48,7 +54,10 @@ const CreateRecipePage: React.FC = ({}) => {
 					<TextField
 						label={`Category ${idx + 1}` + (category.trim().length > 0 ? ` (${category.trim().length}/${config.APP.RECIPE.CATEGORY.LENGTH.MAX})` : '')}
 						value={category}
-						onChange={(e) => handleCategoryChange(idx, e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.includes(',')) return;
+							handleCategoryChange(idx, e.target.value)
+						}}
 						disabled={loading}
 						inputProps={{
 							minLength: config.APP.RECIPE.CATEGORY.LENGTH.MIN,
@@ -104,7 +113,10 @@ const CreateRecipePage: React.FC = ({}) => {
 					<TextField
 						label={`Ingredient ${idx + 1}` + (ingredient.trim().length > 0 ? ` (${ingredient.trim().length}/${config.APP.RECIPE.INGREDIENT.LENGTH.MAX})` : '')}
 						value={ingredient}
-						onChange={(e) => handleIngredientChange(idx, e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.includes(',')) return;
+							handleIngredientChange(idx, e.target.value)
+						}}
 						disabled={loading}
 						inputProps={{
 							minLength: config.APP.RECIPE.INGREDIENT.LENGTH.MIN,
@@ -198,7 +210,7 @@ const CreateRecipePage: React.FC = ({}) => {
 						disabled={loading}
 						inputProps={{
 							minLength: config.APP.RECIPE.TITLE.LENGTH.MIN,
-							maxLength: config.APP.RECIPE.TITLE.LENGTH.MAX
+							maxLength: config.APP.RECIPE.TITLE.LENGTH.MAX,
 						}}
 						value={formData.title}
 						fullWidth
