@@ -180,7 +180,7 @@ export const DeleteRecipeHandler = async (req: Request, res: Response) => {
 		return SERVER_ERROR(res, 'Something went wrong! Recipe has not been deleted');
 	}
 
-	return SUCCESS(res, 'Recipe deleted successfully', {recipe: deletedRecipe});
+	return SUCCESS(res, 'Recipe deleted successfully');
 };
 
 export const GetRecipesHandler = async (req: Request, res: Response) => {
