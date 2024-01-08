@@ -45,7 +45,7 @@ export const createReview = async ({stars, comment = '', userId, recipeId}: {
 	try {
 		return prisma.recipeReview.create({
 			data: {
-				stars,
+				stars: Math.round(stars),
 				comment,
 				recipeId,
 				userId
@@ -85,7 +85,7 @@ export const updateReview = async ({stars, comment = '', reviewId}: {
 		return prisma.recipeReview.update({
 			where: {id:reviewId},
 			data: {
-				stars,
+				stars: Math.round(stars),
 				comment
 			},
 			select: {
