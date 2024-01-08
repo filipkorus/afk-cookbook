@@ -1,2 +1,0 @@
-- dorobic edycje/usuwanie wlasnych przepisow
-- zmienic na textarea recipe descripton przy robieniu

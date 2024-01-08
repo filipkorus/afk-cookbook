@@ -118,7 +118,7 @@ const ReviewComment: React.FC<ReviewCommentProps> = ({review, onUpdate}) => {
 
 					<Rating defaultValue={0.0} value={review.stars} precision={0.5} size="small" readOnly/>
 
-					{currentUser.id === review.author.id && <Box display="inline" my={2} mx={3}>
+					{currentUser.id === review.author.id && <Box display="inline" my={2} ml={1}>
                    <Button size="small"
                            title="Edit"
                            onClick={() => setEditing(true)}
