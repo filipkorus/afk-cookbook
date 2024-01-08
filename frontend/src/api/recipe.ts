@@ -39,6 +39,20 @@ export const getRecipeById = async (id: number) => {
 	return data;
 }
 
+export const getRecipesByCategoriesOrIngredients = async ({page, limit, excludeMyRecipes, names, searchType}: {
+	page: number,
+	limit: number,
+	excludeMyRecipes?: boolean,
+	names: Array<string>,
+	searchType: 'categories' | 'ingredients',
+}) => {
+	const params = `excludeMyRecipes=${excludeMyRecipes ?? false}` + getPaginationUrlParams({page, limit});
+
+	const {data} = await api.get(`/recipe/${searchType}/${encodeURIComponent(names.join(','))}?${params}`);
+
+	return data;
+};
+
 export const getRecipes = async ({page, limit, excludeMyRecipes, categoryName, ingredientName}: {
 	page: number,
 	limit: number,

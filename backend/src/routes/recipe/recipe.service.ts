@@ -595,8 +595,8 @@ export const getPublicRecipesByIngredientOrCategoryNamesList = async ({
 		// Find recipes containing the given ingredients or categories IDs
 		return prisma.recipe.findMany({
 			where: {
-				RecipeIngredient: searchBy === 'ingredient' ? {some: {ingredientId: {in: foundIngredientsOrCategoriesIds}}} : undefined,
-				RecipeCategory: searchBy === 'category' ? {some: {categoryId: {in: foundIngredientsOrCategoriesIds}}} : undefined,
+				RecipeIngredient: searchBy === 'ingredient' ? {every: {ingredientId: {in: foundIngredientsOrCategoriesIds}}} : undefined,
+				RecipeCategory: searchBy === 'category' ? {every: {categoryId: {in: foundIngredientsOrCategoriesIds}}} : undefined,
 				isPublic: true,
 				userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}
 			},
@@ -650,8 +650,8 @@ export const getPublicRecipesByIngredientOrCategoryNamesListCount = async ({
 		// Find recipes containing the given ingredients or categories IDs
 		return prisma.recipe.count({
 			where: {
-				RecipeIngredient: searchBy === 'ingredient' ? {some: {ingredientId: {in: foundIngredientsOrCategoriesIds}}} : undefined,
-				RecipeCategory: searchBy === 'category' ? {some: {categoryId: {in: foundIngredientsOrCategoriesIds}}} : undefined,
+				RecipeIngredient: searchBy === 'ingredient' ? {every: {ingredientId: {in: foundIngredientsOrCategoriesIds}}} : undefined,
+				RecipeCategory: searchBy === 'category' ? {every: {categoryId: {in: foundIngredientsOrCategoriesIds}}} : undefined,
 				isPublic: true,
 				userId: {not: doNotIncludeOwnRecipes ? currentLoggedUserId : undefined}
 			},

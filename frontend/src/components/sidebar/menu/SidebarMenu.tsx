@@ -2,6 +2,7 @@ import React from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ListIcon from '@mui/icons-material/List';
+import CategoryIcon from '@mui/icons-material/Category';
 import SidebarMenuItem from '@/components/sidebar/menu/SidebarMenuItem';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import {useAuth} from '@/context/AuthContext';
@@ -62,6 +63,13 @@ const SidebarMenu: React.FC = () => {
 				text="My recipes"
 				title="My recipes"
 				icon={<ListIcon/>}
+			/>
+
+			<SidebarMenuItem
+				linkTo="/search/"
+				text="Search recipes"
+				title="Search recipes"
+				icon={<CategoryIcon/>}
 			/>
 
 			<SidebarMenuItem

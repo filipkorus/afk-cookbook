@@ -32,12 +32,6 @@ const CreateRecipePage: React.FC = ({}) => {
 		location: ''
 	});
 
-	const preventCommasInsideInput = (event: React.KeyboardEvent) => {
-		if (event.key === ',') {
-			event.preventDefault();
-		}
-	};
-
 	const {
 		items: categories,
 		handleItemChange: handleCategoryChange,

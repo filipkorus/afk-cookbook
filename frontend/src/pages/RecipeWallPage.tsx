@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import {getRecipes} from '@/api/recipe';
+import {Navigate, useLocation, useNavigate, useParams} from 'react-router-dom';
+import {getRecipes, getRecipesByCategoriesOrIngredients} from '@/api/recipe';
 import {useAuth} from '@/context/AuthContext';
 import RecipeListPagination from '@/components/recipe/RecipeListPagination';
 import {Box, Checkbox, FormControlLabel, FormGroup} from '@mui/material';
@@ -16,7 +16,12 @@ type RecipeWallPageProps = {
 
 const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 	const {currentUser} = useAuth();
-	const {name} = useParams();
+	const {name, commaSeparatedNames} = useParams();
+
+	const names = commaSeparatedNames
+		?.split(',')
+		.map(name => name.trim())
+		.filter(name => name !== '');
 
 	const location = useLocation();
 	const query = new URLSearchParams(location.search);
@@ -32,13 +37,23 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 	const getRecipesHandler = () => {
 		setLoading(true);
 
-		getRecipes({
-			page: currentPage,
-			limit: config.APP.PAGINATION.RECIPES_PER_PAGE,
-			excludeMyRecipes: !includeMyRecipes,
-			ingredientName: wallType === 'ingredient' ? name : undefined,
-			categoryName: wallType === 'category' ? name : undefined,
-		})
+		const query = names != null ?
+			getRecipesByCategoriesOrIngredients({
+				page: currentPage,
+				limit: config.APP.PAGINATION.RECIPES_PER_PAGE,
+				excludeMyRecipes: !includeMyRecipes,
+				names,
+				searchType: wallType === 'category' ? 'categories' : 'ingredients'
+			}) :
+			getRecipes({
+				page: currentPage,
+				limit: config.APP.PAGINATION.RECIPES_PER_PAGE,
+				excludeMyRecipes: !includeMyRecipes,
+				ingredientName: wallType === 'ingredient' ? name : undefined,
+				categoryName: wallType === 'category' ? name : undefined,
+			});
+
+		query
 			.then(res => {
 				setTotalPages(res.totalPages);
 				setRecipes(res.recipes);
@@ -53,6 +68,10 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 					return;
 				}
 
+				if (error?.response?.status === 404) {
+					return alert('No recipes matching given criteria found!');
+				}
+
 				if (currentPage > totalPages) {
 					setCurrentPage(totalPages);
 				}
@@ -64,14 +83,21 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 
 	useEffect(() => {
 		if (loading) return;
+		if (names?.length === 1) return;
 
 		getRecipesHandler();
 	}, [currentPage, includeMyRecipes, name]);
 
 	useEffect(() => {
+		if (names?.length === 1) return;
+
 		query.set('p', currentPage.toString());
 		navigate(`?${query.toString()}`);
 	}, [currentPage]);
+
+	if (names?.length === 1) {
+		return <Navigate to={`/${wallType}/${names[0]}`}/>;
+	}
 
 	const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
 		setCurrentPage(page);
