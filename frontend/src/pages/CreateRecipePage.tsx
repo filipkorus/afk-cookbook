@@ -32,6 +32,12 @@ const CreateRecipePage: React.FC = ({}) => {
 		location: ''
 	});
 
+	const preventCommasInsideInput = (event: React.KeyboardEvent) => {
+		if (event.key === ',') {
+			event.preventDefault();
+		}
+	};
+
 	const {
 		items: categories,
 		handleItemChange: handleCategoryChange,
@@ -46,9 +52,12 @@ const CreateRecipePage: React.FC = ({}) => {
 			<Grid container spacing={2} key={idx}>
 				<Grid item xs={10}>
 					<TextField
-						label={`Category ${idx + 1}` + (category.length > 0 ? ` (${category.length}/${config.APP.RECIPE.CATEGORY.LENGTH.MAX})` : '')}
+						label={`Category ${idx + 1}` + (category.trim().length > 0 ? ` (${category.trim().length}/${config.APP.RECIPE.CATEGORY.LENGTH.MAX})` : '')}
 						value={category}
-						onChange={(e) => handleCategoryChange(idx, e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.includes(',')) return;
+							handleCategoryChange(idx, e.target.value)
+						}}
 						disabled={loading}
 						inputProps={{
 							minLength: config.APP.RECIPE.CATEGORY.LENGTH.MIN,
@@ -56,14 +65,14 @@ const CreateRecipePage: React.FC = ({}) => {
 						}}
 						error={
 							(categoriesError?.code === 'too_small' &&
-								category.length < (categoriesError?.minimum ?? config.APP.RECIPE.CATEGORY.LENGTH.MIN))
+								category.trim().length < (categoriesError?.minimum ?? config.APP.RECIPE.CATEGORY.LENGTH.MIN))
 							||
 							(categoriesError?.code === 'too_big' &&
 								category.length > (categoriesError?.maximum ?? config.APP.RECIPE.CATEGORY.LENGTH.MAX))
 						}
 						helperText={
 							(categoriesError?.code === 'too_small' &&
-								category.length < (categoriesError?.minimum ?? config.APP.RECIPE.CATEGORY.LENGTH.MIN))
+								category.trim().length < (categoriesError?.minimum ?? config.APP.RECIPE.CATEGORY.LENGTH.MIN))
 							||
 							(categoriesError?.code === 'too_big' &&
 								category.length > (categoriesError?.maximum ?? config.APP.RECIPE.CATEGORY.LENGTH.MAX))
@@ -102,9 +111,12 @@ const CreateRecipePage: React.FC = ({}) => {
 			<Grid container spacing={2} key={idx}>
 				<Grid item xs={10}>
 					<TextField
-						label={`Ingredient ${idx + 1}` + (ingredient.length > 0 ? ` (${ingredient.length}/${config.APP.RECIPE.INGREDIENT.LENGTH.MAX})` : '')}
+						label={`Ingredient ${idx + 1}` + (ingredient.trim().length > 0 ? ` (${ingredient.trim().length}/${config.APP.RECIPE.INGREDIENT.LENGTH.MAX})` : '')}
 						value={ingredient}
-						onChange={(e) => handleIngredientChange(idx, e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.includes(',')) return;
+							handleIngredientChange(idx, e.target.value)
+						}}
 						disabled={loading}
 						inputProps={{
 							minLength: config.APP.RECIPE.INGREDIENT.LENGTH.MIN,
@@ -112,14 +124,14 @@ const CreateRecipePage: React.FC = ({}) => {
 						}}
 						error={
 							(ingredientsError?.code === 'too_small' &&
-								ingredient.length < (ingredientsError?.minimum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MIN))
+								ingredient.trim().length < (ingredientsError?.minimum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MIN))
 							||
 							(ingredientsError?.code === 'too_big' &&
 								ingredient.length > (ingredientsError?.maximum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MAX))
 						}
 						helperText={
 							(ingredientsError?.code === 'too_small' &&
-								ingredient.length < (ingredientsError?.minimum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MIN))
+								ingredient.trim().length < (ingredientsError?.minimum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MIN))
 							||
 							(ingredientsError?.code === 'too_big' &&
 								ingredient.length > (ingredientsError?.maximum ?? config.APP.RECIPE.INGREDIENT.LENGTH.MAX))
@@ -190,7 +202,7 @@ const CreateRecipePage: React.FC = ({}) => {
 					<TextField
 						variant="outlined"
 						required
-						label={"Title" + (formData.title.length > 0 ? ` (${formData.title.length}/${config.APP.RECIPE.TITLE.LENGTH.MAX})` : '')}
+						label={"Title" + (formData.title.trim().length > 0 ? ` (${formData.title.trim().length}/${config.APP.RECIPE.TITLE.LENGTH.MAX})` : '')}
 						name="title"
 						error={fieldError('title') != null}
 						helperText={fieldError('title')?.message}
@@ -198,7 +210,7 @@ const CreateRecipePage: React.FC = ({}) => {
 						disabled={loading}
 						inputProps={{
 							minLength: config.APP.RECIPE.TITLE.LENGTH.MIN,
-							maxLength: config.APP.RECIPE.TITLE.LENGTH.MAX
+							maxLength: config.APP.RECIPE.TITLE.LENGTH.MAX,
 						}}
 						value={formData.title}
 						fullWidth
@@ -231,8 +243,13 @@ const CreateRecipePage: React.FC = ({}) => {
 						required
 						label="Description"
 						name="description"
-						error={fieldError('description') != null}
-						helperText={fieldError('description')?.message}
+						error={fieldError('description') != null || (formData.description.length > 0 && formData.description.length < config.APP.RECIPE.DESCRIPTION.LENGTH.MIN)}
+						helperText={
+							fieldError('description')?.message ??
+							(formData.description.length > 0 && formData.description.length < config.APP.RECIPE.DESCRIPTION.LENGTH.MIN ?
+								`description should be longer than ${config.APP.RECIPE.DESCRIPTION.LENGTH.MIN} characters` :
+								'')
+						}
 						onChange={handleInputChange}
 						disabled={loading}
 						inputProps={{minLength: config.APP.RECIPE.DESCRIPTION.LENGTH.MIN}}
@@ -252,7 +269,7 @@ const CreateRecipePage: React.FC = ({}) => {
 					<TextField
 						type="text"
 						variant='outlined'
-						label={"Location" + (formData.location?.length ?? 0 > 0 ? ` (${formData.location?.length}/${config.APP.RECIPE.LOCATION.LENGTH.MAX})` : '')}
+						label={"Location" + (formData.location?.trim().length ?? 0 > 0 ? ` (${formData.location?.trim().length}/${config.APP.RECIPE.LOCATION.LENGTH.MAX})` : '')}
 						name="location"
 						onChange={handleInputChange}
 						value={formData.location}

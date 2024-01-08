@@ -7,7 +7,7 @@ import ReviewComment from '@/components/recipe/review/ReviewComment';
 import Review from '@/types/Review.ts';
 import {getReviews, getStars} from '@/api/review';
 import {AxiosError} from 'axios';
-import ReviewCreate from '@/components/recipe/review/ReviewCreate';
+import ReviewCreate from '@/components/recipe/review/ReviewCreate.tsx';
 import {useAuth} from '@/context/AuthContext';
 import Stars from '@/types/Stars';
 import ReviewCommentListPagination from '@/components/recipe/review/ReviewCommentListPagination';
@@ -70,8 +70,8 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 			.finally(() => setLoading(false));
 	}, [openReviews, currentPage]);
 
-	const refreshStars = () => {
-		if (stars != null) return;
+	const refreshStars = (forceRefresh?: boolean) => {
+		if (!forceRefresh && stars != null) return;
 
 		getStars(recipe.id)
 			.then(({stars}) => setStars(stars))
@@ -110,11 +110,21 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 								{recipe.author.id !== currentUser.id &&
                             <Box m={1}>
 										 {currentUserReview ?
-											 <ReviewComment review={currentUserReview}/> :
-											 <ReviewCreate recipeId={recipe.id} onCreate={(review) => {
-												 setCurrentUserReview(review);
-												 refreshStars();
-											 }}/>
+											 <ReviewComment
+												 review={currentUserReview}
+												 onUpdate={(review) => {
+													 console.log('odswiezyc gwiazdki')
+													 setCurrentUserReview(review);
+													 refreshStars(true);
+												 }}
+											 /> :
+											 <ReviewCreate
+												 recipeId={recipe.id}
+												 onCreate={(review) => {
+													 setCurrentUserReview(review);
+													 refreshStars(true);
+												 }}
+											 />
 										 }
 										 {reviews.length > 0 && <Divider sx={{margin: '1rem'}}/>}
                             </Box>

@@ -12,6 +12,22 @@ export const createReview = async ({review, recipeId}: {
 	return data;
 }
 
+export const editReview = async ({review, reviewId}: {
+	review: ReviewToAdd,
+	reviewId: number
+}) => {
+	const {data} = await api.put(`/recipe/review/${reviewId}`, {
+		stars: review.stars,
+		comment: review.comment
+	});
+	return data;
+}
+
+export const deleteReview = async (reviewId: number) => {
+	const {data} = await api.delete(`/recipe/review/${reviewId}`);
+	return data;
+}
+
 export const getReviews = async ({recipeId, page, limit}: {
 	recipeId: number,
 	page?: number,
