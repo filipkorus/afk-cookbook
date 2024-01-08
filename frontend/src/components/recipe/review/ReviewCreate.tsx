@@ -1,34 +1,26 @@
 import React, {useState} from 'react';
 import {z} from 'zod';
-import useForm from '@/hooks/useForm.ts';
-import {Alert, Box, Button, FormGroup, Rating, TextField, Typography} from '@mui/material';
-import theme from '@/theme';
 import {AxiosError} from 'axios';
-import {createReview} from '@/api/review.ts';
-import ReviewToAdd from '@/types/ReviewToAdd.ts';
-import config from '@/config';
-import Review from '@/types/Review.ts';
+import {createReview} from '@/api/review';
+import ReviewToAdd from '@/types/ReviewToAdd';
+import Review from '@/types/Review';
+import ReviewForm from '@/components/recipe/review/ReviewForm';
+
 
 type ReviewCreateProps = {
 	recipeId: number;
 	onCreate?: (currentUserComment: Review) => any
 };
 
-const ReviewCreate: React.FC<ReviewCreateProps> = ({recipeId, onCreate}) => {
+const ReviewCreate: React.FC<ReviewCreateProps> = ({
+	                                                   recipeId,
+	                                                   onCreate
+                                                   }) => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [errorFields, setErrorFields] = useState<Array<z.ZodIssue & { minimum?: number, maximum?: number }>>([]);
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [errorMessage, setErrorMessage] = useState<string>('');
 
-	const fieldError = (fieldName: keyof ReviewToAdd) => errorFields.find(error => error.path[0] === fieldName);
-
-	const {formData, handleInputChange, setNewFormValues, resetForm} = useForm<ReviewToAdd>({
-		stars: config.APP.RECIPE_REVIEW.STARS.DEFAULT,
-		comment: ''
-	});
-
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-
+	const handleSubmit = (formData: ReviewToAdd) => {
 		setLoading(true);
 
 		createReview({
@@ -37,12 +29,9 @@ const ReviewCreate: React.FC<ReviewCreateProps> = ({recipeId, onCreate}) => {
 		})
 			.then(({success, msg, data}) => {
 				if (success) {
-					// reset all inputs to initial values
-					resetForm();
-
 					// remove errors
 					setErrorFields([]);
-					setErrorMessage(null);
+					setErrorMessage('');
 
 					onCreate && onCreate(data?.review);
 				} else {
@@ -55,55 +44,16 @@ const ReviewCreate: React.FC<ReviewCreateProps> = ({recipeId, onCreate}) => {
 				setErrorFields(error?.response?.data?.errors ?? []);
 				setErrorMessage(error?.response?.data?.msg);
 			})
-			.finally(() => {
-				setLoading(false);
-			});
+			.finally(() => setLoading(false));
 	};
 
-	return <form onSubmit={handleSubmit}>
-		<Typography>Write your review</Typography>
-		<FormGroup>
-			{fieldError('stars') && <Box my={1}>
-             <Alert severity="error">{fieldError('stars')?.message}</Alert>
-         </Box>}
-
-			{errorMessage != null && <Box my={1}>
-             <Alert severity="error">{errorMessage}</Alert>
-         </Box>}
-
-			<Rating name="stars" value={formData.stars} onChange={(event: React.SyntheticEvent, value: number | null) => {
-				setNewFormValues({
-					...formData,
-					stars: value == null ?
-						config.APP.RECIPE_REVIEW.STARS.DEFAULT :
-						value
-				});
-			}} max={config.APP.RECIPE_REVIEW.STARS.MAX} defaultValue={config.APP.RECIPE_REVIEW.STARS.DEFAULT}
-			        precision={0.5}/>
-
-			<TextField
-				multiline
-				maxRows={5}
-				variant="outlined"
-				label={'Comment' + (formData.comment.trim().length > 0 ? ` (${formData.comment.trim().length}/${config.APP.RECIPE_REVIEW.COMMENT.LENGTH.MAX})` : '')}
-				name="comment"
-				error={fieldError('comment') != null}
-				helperText={fieldError('comment')?.message}
-				onChange={handleInputChange}
-				disabled={loading}
-				inputProps={{
-					maxLength: config.APP.RECIPE_REVIEW.COMMENT.LENGTH.MAX
-				}}
-				value={formData.comment}
-				fullWidth
-				sx={{mb: 2, mt: 2}}
-			/>
-		</FormGroup>
-
-		<Button style={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
-		        variant="outlined" type="submit"
-		        disabled={loading} fullWidth>Submit</Button>
-	</form>;
+	return <ReviewForm
+		action="create"
+		onSubmit={handleSubmit}
+		disableForm={loading}
+		errorFields={errorFields}
+		errorMessage={errorMessage}
+	/>;
 };
 
 export default ReviewCreate;
