@@ -41,12 +41,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 	return <form onSubmit={_handleSubmit}>
 		<Typography>{action === 'edit' ? 'Edit' : 'Write'} your review</Typography>
 		<FormGroup>
-			{fieldError('stars') && <Box my={1}>
-             <Alert severity="error">{fieldError('stars')?.message}</Alert>
-         </Box>}
-
-			{errorMessage != null && errorMessage !== '' && <Box my={1}>
-             <Alert severity="error">{errorMessage}</Alert>
+			{(fieldError('stars') || (errorMessage != null && errorMessage !== ''))&& <Box my={1}>
+             <Alert severity="error">{fieldError('stars')?.message ?? errorMessage}</Alert>
          </Box>}
 
 			<Rating name="stars" value={formData.stars} onChange={(event: React.SyntheticEvent, value: number | null) => {
@@ -57,7 +53,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 						value
 				});
 			}} max={config.APP.RECIPE_REVIEW.STARS.MAX} defaultValue={config.APP.RECIPE_REVIEW.STARS.DEFAULT}
-			        precision={0.5}/>
+			        precision={1}/>
 
 			<TextField
 				multiline

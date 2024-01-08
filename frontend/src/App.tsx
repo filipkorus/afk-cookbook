@@ -9,6 +9,7 @@ import RecipeWallPage from '@/pages/RecipeWallPage';
 import CreateRecipePage from '@/pages/CreateRecipePage';
 import RecipesOfUserPage from '@/pages/RecipesOfUserPage';
 import RecipePage from '@/pages/RecipePage';
+import SearchPage from '@/pages/SearchPage';
 
 const App = () => {
 	return <Router>
@@ -42,9 +43,27 @@ const App = () => {
 					</DrawerView>
 				}/>
 
+				<Route path="ingredients/:commaSeparatedNames" element={
+					<DrawerView>
+						<RecipeWallPage wallType="ingredient"/>
+					</DrawerView>
+				}/>
+
 				<Route path="category/:name" element={
 					<DrawerView pageTitle="Category wall">
 						<RecipeWallPage wallType="category"/>
+					</DrawerView>
+				}/>
+
+				<Route path="categories/:commaSeparatedNames" element={
+					<DrawerView>
+						<RecipeWallPage wallType="category"/>
+					</DrawerView>
+				}/>
+
+				<Route path="search" element={
+					<DrawerView pageTitle="Search recipes">
+						<SearchPage />
 					</DrawerView>
 				}/>
 
