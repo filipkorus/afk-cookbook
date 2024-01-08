@@ -54,8 +54,8 @@ const RecipesOfUserPage: React.FC = () => {
 					return;
 				}
 
-				if (currentPage > totalPages) {
-					setCurrentPage(totalPages);
+				if (currentPage > error?.response?.data?.totalPages) {
+					setCurrentPage(error?.response?.data?.totalPages);
 				}
 			})
 			.finally(() => {
