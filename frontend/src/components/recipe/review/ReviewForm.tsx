@@ -41,19 +41,28 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 	return <form onSubmit={_handleSubmit}>
 		<Typography>{action === 'edit' ? 'Edit' : 'Write'} your review</Typography>
 		<FormGroup>
-			{(fieldError('stars') || (errorMessage != null && errorMessage !== ''))&& <Box my={1}>
+			{(fieldError('stars') || (errorMessage != null && errorMessage !== '')) && <Box my={1}>
              <Alert severity="error">{fieldError('stars')?.message ?? errorMessage}</Alert>
          </Box>}
 
-			<Rating name="stars" value={formData.stars} onChange={(event: React.SyntheticEvent, value: number | null) => {
-				setNewFormValues({
-					...formData,
-					stars: value == null ?
-						config.APP.RECIPE_REVIEW.STARS.DEFAULT :
-						value
-				});
-			}} max={config.APP.RECIPE_REVIEW.STARS.MAX} defaultValue={config.APP.RECIPE_REVIEW.STARS.DEFAULT}
-			        precision={1}/>
+			<Rating
+				name="stars"
+				value={formData.stars}
+				onChange={
+					(event: React.SyntheticEvent, value: number | null) => {
+						if (
+							value == null ||
+							value < config.APP.RECIPE_REVIEW.STARS.MIN ||
+							value > config.APP.RECIPE_REVIEW.STARS.MAX
+						) return;
+
+						setNewFormValues({
+							...formData,
+							stars: value
+						});
+					}
+				} max={config.APP.RECIPE_REVIEW.STARS.MAX} defaultValue={config.APP.RECIPE_REVIEW.STARS.DEFAULT}
+				precision={1}/>
 
 			<TextField
 				multiline

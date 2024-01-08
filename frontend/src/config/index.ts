@@ -20,7 +20,8 @@ const CONFIG = {
 	OAUTH_GOOGLE_CLIENT_ID: '325396365340-a0ufpksrnsmigrpko21ah2to0n3p6uv9.apps.googleusercontent.com',
 	APP: {
 		PAGINATION: {
-			RECIPES_PER_PAGE: 3,
+			RECIPES_PER_PAGE: 5,
+			COMMENTS_PER_PAGE: 3,
 			STARTING_PAGE_NUMBER: 1
 		},
 		RECIPE: {

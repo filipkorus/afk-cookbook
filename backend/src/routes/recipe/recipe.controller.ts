@@ -329,7 +329,7 @@ export const GetRecipesByIngredientOrCategoryNameHandler = (searchBy: SearchReci
 		]);
 
 		if (recipesWithIdFieldOnly == null) {
-			return NOT_FOUND(res, 'no recipes found');
+			return NOT_FOUND(res, 'No recipes found');
 		}
 
 		const recipesPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getRecipeById(recipe.id)));
@@ -436,8 +436,8 @@ export const GetRecipesByIngredientOrCategoryNamesListHandler = (searchBy: Searc
 			})
 		]);
 
-		if (recipesWithIdFieldOnly == null) {
-			return NOT_FOUND(res, 'no recipes found');
+		if (recipesWithIdFieldOnly == null || recipesWithIdFieldOnly.length === 0) {
+			return NOT_FOUND(res, 'No recipes found');
 		}
 
 		const recipesPromises = Promise.all(recipesWithIdFieldOnly.map(recipe => getRecipeById(recipe.id)));

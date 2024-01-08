@@ -1,3 +1,0 @@
-- dorobic edycje/usuwanie wlasnych przepisow
-- naprawić responsywność src/pages/LoginPage.tsc na urzadzeniach mobilnych
-- zmienic na textarea recipe descripton przy robieniu
