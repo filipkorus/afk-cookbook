@@ -1,7 +1,7 @@
 import React from 'react';
 import {v4 as uuidv4} from 'uuid';
 import {Box, Pagination, Typography} from '@mui/material';
-import RecipeCard, {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard.tsx';
+import RecipeCard, {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard';
 
 type RecipeListPaginationProps = {
 	recipes: Array<RecipeWithCategoriesIngredientsAuthorAndStars>,

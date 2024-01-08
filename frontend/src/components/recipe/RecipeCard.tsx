@@ -9,18 +9,18 @@ import {
 	Typography,
 	Box, FormControlLabel, Grid, Button,
 } from '@mui/material';
-import timeSince from '@/utils/date/timeSince.ts';
-import Recipe from '@/types/Recipe.ts';
-import User from '@/types/User.ts';
-import Category from '@/types/Category.ts';
-import Ingredient from '@/types/Ingredient.ts';
+import timeSince from '@/utils/date/timeSince';
+import Recipe from '@/types/Recipe';
+import User from '@/types/User';
+import Category from '@/types/Category';
+import Ingredient from '@/types/Ingredient';
 import theme from '@/theme';
-import Stars from '@/types/Stars.ts';
-import ReviewSection from '@/components/recipe/review/ReviewSection.tsx';
-import RouterLink from '@/components/routing/RouterLink.tsx';
+import Stars from '@/types/Stars';
+import ReviewSection from '@/components/recipe/review/ReviewSection';
+import RouterLink from '@/components/routing/RouterLink';
 import LockIcon from '@mui/icons-material/Lock';
 import {useNavigate, useParams} from 'react-router-dom';
-import {useAuth} from '@/context/AuthContext.tsx';
+import {useAuth} from '@/context/AuthContext';
 
 export type RecipeWithCategoriesIngredientsAuthorAndStars = Recipe & {
 	categories: Array<Category>;

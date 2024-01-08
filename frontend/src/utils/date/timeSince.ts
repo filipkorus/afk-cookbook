@@ -36,9 +36,9 @@ const timeSince = (date: string | Date) => {
 		return `${Math.floor(interval)}min`;
 	}
 
-	const sec = Math.floor(seconds);
+	const sec = Math.floor(Math.max(1, seconds));
 
-	return sec < 10 ? 'now' : `${sec}s`;
+	return `${sec}s`;
 }
 
 export default timeSince;

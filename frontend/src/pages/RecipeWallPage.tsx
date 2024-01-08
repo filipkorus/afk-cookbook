@@ -69,7 +69,9 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 				}
 
 				if (error?.response?.status === 404) {
-					return alert('No recipes matching given criteria found!');
+					alert('No recipes matching given criteria found!');
+					navigate('/search');
+					return;
 				}
 
 				if (currentPage > totalPages) {

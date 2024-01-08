@@ -43,7 +43,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 		getReviews({
 			recipeId: recipe.id,
 			page: currentPage,
-			limit: config.APP.PAGINATION.RECIPES_PER_PAGE
+			limit: config.APP.PAGINATION.COMMENTS_PER_PAGE
 		})
 			.then(({reviews, currentUserReview, totalPages}) => {
 				setTotalPages(totalPages);
