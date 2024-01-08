@@ -113,7 +113,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 											 <ReviewComment
 												 review={currentUserReview}
 												 onUpdate={(review) => {
-													 console.log('odswiezyc gwiazdki')
 													 setCurrentUserReview(review);
 													 refreshStars(true);
 												 }}

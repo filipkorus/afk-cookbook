@@ -43,6 +43,7 @@ const ReviewComment: React.FC<ReviewCommentProps> = ({review, onUpdate}) => {
 					setErrorMessage('');
 
 					onUpdate && onUpdate(review);
+					setEditing(false);
 				} else {
 					setErrorMessage(msg);
 				}
@@ -51,12 +52,9 @@ const ReviewComment: React.FC<ReviewCommentProps> = ({review, onUpdate}) => {
 				if (!(error instanceof AxiosError)) return;
 
 				setErrorFields(error?.response?.data?.errors ?? []);
-				setErrorMessage(error?.response?.data?.msg);
+				setErrorMessage(error?.response?.data?.msg ?? 'Error');
 			})
-			.finally(() => {
-				setLoading(false);
-				setEditing(false);
-			});
+			.finally(() => setLoading(false));
 	};
 
 	const handleDeleteSubmit = () => {
