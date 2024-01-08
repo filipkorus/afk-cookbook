@@ -69,6 +69,59 @@ export const createReview = async ({stars, comment = '', userId, recipeId}: {
 };
 
 /**
+ * Save recipe's updated review in the database.
+ *
+ * @param stars {number} Number of stars.
+ * @param comment {string} Review's text. Optional - empty string is the default value.
+ * @param reviewId {number} Review's ID.
+ * @returns { Promise<RecipeReview | null>} RecipeReview object or null if error.
+ */
+export const updateReview = async ({stars, comment = '', reviewId}: {
+	stars: number,
+	comment?: string,
+	reviewId: number
+}): Promise<RecipeReview | null> => {
+	try {
+		return prisma.recipeReview.update({
+			where: {id:reviewId},
+			data: {
+				stars,
+				comment
+			},
+			select: {
+				author: {
+					select: {id: true, name: true, picture: true, admin: true, joinedAt: true}
+				},
+				id: true,
+				stars: true,
+				comment: true,
+				recipeId: true,
+				userId: true,
+				createdAt: true
+			}
+		});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
+};
+
+/**
+ * Removes review from the database.
+ *
+ * @param reviewId {number} Review's ID.
+ * @returns { Promise<RecipeReview | null>} RecipeReview object or null if error.
+ */
+export const deleteReview = async (reviewId: number): Promise<RecipeReview | null> => {
+	try {
+		return prisma.recipeReview.delete({where: {id:reviewId}});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
+};
+
+/**
  * Returns average (and quantity) of all star reviews of given recipe.
  *
  * @param recipeId {number} Recipe's ID.
@@ -165,6 +218,21 @@ export const getReviewByRecipeIdAndUserId = ({userId, recipeId}: {
 				createdAt: true
 			}
 		});
+	} catch (error) {
+		logger.error(error);
+		return null;
+	}
+};
+
+/**
+ * Returns review with given ID.
+ *
+ * @param reviewId {number} Review's ID/
+ * @returns {Promise<RecipeReview | null> | null} RecipeReview object or null if error occurred.
+ */
+export const getReviewByReviewId = (reviewId: number): Promise<RecipeReview | null> | null => {
+	try {
+		return prisma.recipeReview.findUnique({where: {id: reviewId}});
 	} catch (error) {
 		logger.error(error);
 		return null;

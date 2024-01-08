@@ -10,6 +10,7 @@ const router = Router();
 router.use('/auth', authRouter);
 router.use('/user', requireAuth, userRouter);
 router.use('/recipe', requireAuth, recipeRouter);
+
 router.get('/', HelloWorldHandler);
 
 export default router;

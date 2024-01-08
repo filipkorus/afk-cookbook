@@ -4,8 +4,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import ListIcon from '@mui/icons-material/List';
 import SidebarMenuItem from '@/components/sidebar/menu/SidebarMenuItem';
 import PostAddIcon from '@mui/icons-material/PostAdd';
-import { useAuth } from '@/context/AuthContext.tsx';
-import { useNavigate } from 'react-router-dom';
+import {useAuth} from '@/context/AuthContext';
+import {useNavigate} from 'react-router-dom';
 import {
 	Avatar,
 	Button,
@@ -15,12 +15,12 @@ import {
 	Typography,
 	Box,
 } from '@mui/material';
-import formatDate from '@/utils/date/formatDate.ts';
-import {useSidebar} from '@/context/SidebarContext.tsx';
+import formatDate from '@/utils/date/formatDate';
+import {useSidebar} from '@/context/SidebarContext';
 import theme from '@/theme';
 
 const SidebarMenu: React.FC = () => {
-	const { currentUser, handleLogout } = useAuth();
+	const {currentUser, handleLogout} = useAuth();
 	const navigate = useNavigate();
 	const {isSidebarOpen} = useSidebar();
 
@@ -30,7 +30,7 @@ const SidebarMenu: React.FC = () => {
 		<Box display="flex" flexDirection="column" height="100%">
 			<ListItem alignItems="flex-start">
 				<ListItemAvatar>
-					<Avatar alt={currentUser.name} src={currentUser.picture} />
+					<Avatar alt={currentUser.name} src={currentUser.picture}/>
 				</ListItemAvatar>
 				<ListItemText
 					primary={currentUser.name}
@@ -54,30 +54,30 @@ const SidebarMenu: React.FC = () => {
 				linkTo="/recipe"
 				text="Create Recipe"
 				title="Create Recipe"
-				icon={<PostAddIcon />}
+				icon={<PostAddIcon/>}
 			/>
 
 			<SidebarMenuItem
 				linkTo={`/recipe/user/${currentUser.id}`}
 				text="My recipes"
 				title="My recipes"
-				icon={<ListIcon />}
+				icon={<ListIcon/>}
 			/>
 
 			<SidebarMenuItem
 				linkTo="/"
 				text="Wall"
 				title="Wall"
-				icon={<DashboardIcon />}
+				icon={<DashboardIcon/>}
 			/>
 
-			<Box sx={{ mt: 'auto' }}>
+			<Box sx={{mt: 'auto'}}>
 				<Button
 					fullWidth
 					style={{
 						display: 'flex',
-						color:theme.palette.primary.main,
-						borderColor:theme.palette.primary.main,
+						color: theme.palette.primary.main,
+						borderColor: theme.palette.primary.main,
 						maxWidth: '95%',
 						margin: '0 auto',
 						textTransform: 'none',
@@ -85,10 +85,11 @@ const SidebarMenu: React.FC = () => {
 					title="Log out"
 					variant="outlined"
 					onClick={() =>
-						handleLogout().then(({ success, error }) => {
-							if (error) return alert(error);
-							navigate('/login?loggedOut=true');
-						})
+						handleLogout()
+							.then(({success, error}) => {
+								if (error) return alert(error);
+								navigate('/login?loggedOut=true');
+							})
 					}
 				>
 					<Box
@@ -98,7 +99,7 @@ const SidebarMenu: React.FC = () => {
 							justifyContent: 'center',
 						}}
 					>
-						<LogoutIcon sx={{ marginLeft: isSidebarOpen ? '5px' : '0' }} />
+						<LogoutIcon sx={{marginLeft: isSidebarOpen ? '5px' : '0'}}/>
 						{isSidebarOpen && (
 							<Typography
 								sx={{
