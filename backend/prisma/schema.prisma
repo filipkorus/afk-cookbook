@@ -29,12 +29,6 @@ model RefreshToken {
   userId    Int
 }
 
-model Settings {
-  id    Int    @id @default(autoincrement())
-  key   String @unique @db.VarChar(255)
-  value String @db.VarChar(255)
-}
-
 model Recipe {
   id                 Int                @id @default(autoincrement())
   title              String             @db.VarChar(255)
@@ -43,8 +37,6 @@ model Recipe {
   isPublic           Boolean            @default(false)
   createdAt          DateTime           @default(now())
   location           String?            @db.VarChar(255)
-  latitude           Float?
-  longitude          Float?
   author             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId             Int
   RecipeReview       RecipeReview[]
