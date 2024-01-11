@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Alert, Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, TextField} from '@mui/material';
 import config from '@/config';
 import theme from '@/theme';
@@ -8,6 +8,8 @@ import useItemList from '@/hooks/useItemList';
 import ErrorFields from '@/types/ErrorFields';
 import Action from '@/types/Action';
 import {useNavigate} from 'react-router-dom';
+import geocode from '@/api/geocode.ts';
+import coords from '@/types/Coords.ts';
 
 type RecipeFormProps = {
 	initialValues?: RecipeToAddOrEdit,
@@ -18,15 +20,24 @@ type RecipeFormProps = {
 	action: Action
 };
 
-const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, disableForm, errorFields, resetForm, action}) => {
+const RecipeForm: React.FC<RecipeFormProps> = ({
+	                                               initialValues,
+	                                               handleSubmit,
+	                                               disableForm,
+	                                               errorFields,
+	                                               resetForm,
+	                                               action
+                                               }) => {
 	const navigate = useNavigate();
+	const locateButtonRef = useRef<HTMLButtonElement | null>(null);
 
 	const fieldError = (fieldName: keyof RecipeToAddOrEdit) => errorFields.find(error => error.path[0] === fieldName);
 
 	const {
 		formData,
 		handleInputChange,
-		resetForm: resetFormValues
+		resetForm: resetFormValues,
+		setNewFormValues
 	} = useForm<
 		Omit<RecipeToAddOrEdit, 'ingredients' | 'categories'>
 	>(initialValues ?? {
@@ -79,7 +90,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, dis
 						}
 						required
 						fullWidth
-						sx={{mb: 2, mt: idx === 0 ? 3 : 1}}
+						sx={{mb: 2, mt: 1}}
 					/>
 				</Grid>
 				{categories.length > 1 && <Grid item xs={2}>
@@ -88,7 +99,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, dis
                     color="error"
                     disabled={disableForm}
                     onClick={() => removeCategoryInput(idx)}
-                    sx={{mb: 2, mt: idx === 0 ? 3 : 1}}>
+                    sx={{mb: 2, mt: 1}}>
                     Remove
                 </Button>
             </Grid>}
@@ -138,7 +149,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, dis
 						}
 						required
 						fullWidth
-						sx={{mb: 2, mt: idx === 0 ? 3 : 1}}
+						sx={{mb: 2, mt: 1}}
 					/>
 				</Grid>
 				{ingredients.length > 1 && <Grid item xs={2}>
@@ -147,7 +158,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, dis
                     color="error"
                     disabled={disableForm}
                     onClick={() => removeIngredientInput(idx)}
-                    sx={{mb: 2, mt: idx === 0 ? 3 : 1}}>
+                    sx={{mb: 2, mt: 1}}>
                     Remove
                 </Button>
             </Grid>}
@@ -231,7 +242,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, dis
 				inputProps={{minLength: config.APP.RECIPE.DESCRIPTION.LENGTH.MIN}}
 				value={formData.description}
 				fullWidth
-				sx={{mb: 2, mt: 1}}
+				sx={{my: 1}}
 			/>
 
 			<FormControlLabel disabled={disableForm} control={
@@ -242,20 +253,64 @@ const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, dis
 				/>
 			} label="Make this recipe public" sx={{mb: 2, mt: 1}}/>
 
-			<TextField
-				type="text"
-				variant='outlined'
-				label={"Location" + (formData.location?.trim().length ?? 0 > 0 ? ` (${formData.location?.trim().length}/${config.APP.RECIPE.LOCATION.LENGTH.MAX})` : '')}
-				name="location"
-				onChange={handleInputChange}
-				value={formData.location}
-				disabled={disableForm}
-				inputProps={{maxLength: config.APP.RECIPE.LOCATION.LENGTH.MAX}}
-				error={fieldError('location') != null}
-				helperText={fieldError('location')?.message}
-				fullWidth
-				sx={{mb: 4}}
-			/>
+			<Box mb={2}>
+				<TextField
+					type="text"
+					variant='outlined'
+					label={"Location" + (formData.location?.trim().length ?? 0 > 0 ? ` (${formData.location?.trim().length}/${config.APP.RECIPE.LOCATION.LENGTH.MAX})` : '')}
+					name="location"
+					onChange={handleInputChange}
+					value={formData.location}
+					disabled={disableForm}
+					inputProps={{maxLength: config.APP.RECIPE.LOCATION.LENGTH.MAX}}
+					error={fieldError('location') != null}
+					helperText={fieldError('location')?.message}
+					fullWidth
+					sx={{mb: 1}}
+				/>
+
+				<Button
+					variant="outlined" type="button"
+					ref={locateButtonRef}
+					style={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
+					onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+						if (locateButtonRef.current instanceof HTMLButtonElement) {
+							locateButtonRef.current.disabled = true;
+						}
+
+						navigator.geolocation.getCurrentPosition(
+							position => {
+								geocode({
+									lat: position.coords.latitude,
+									lon: position.coords.longitude
+								})
+									.then(({success, error, data}) => {
+										if (error) {
+											return alert('Unable to retrieve location. Reason: Geocode API error. Try again in a few seconds.');
+										}
+
+										setNewFormValues({
+											...formData,
+											location: data?.location ?? data?.country ?? 'Somewhere in the Universe'
+										});
+
+										// hide button
+										if (locateButtonRef.current instanceof HTMLButtonElement) {
+											locateButtonRef.current.style.display = 'none';
+										}
+									});
+							},
+							err => alert(`Unable to retrieve location. Reason: ${err.message.toLowerCase()}.`)
+						);
+
+						if (locateButtonRef.current instanceof HTMLButtonElement) {
+							locateButtonRef.current.disabled = false;
+						}
+					}}
+					disabled={disableForm ?? locateButtonRef.current?.disabled} fullWidth>
+					Use my current location
+				</Button>
+			</Box>
 
 			<Divider/>
 
