@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {getRecipeById} from '@/api/recipe.ts';
 import {AxiosError} from 'axios';
 import RecipeCard, {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard';
@@ -9,6 +9,9 @@ const RecipePage: React.FC = () => {
 	const navigate = useNavigate();
 	const [recipe, setRecipe] = useState<RecipeWithCategoriesIngredientsAuthorAndStars | null>(null);
 
+	const location = useLocation();
+	const searchParams = new URLSearchParams(location.search);
+	const editedParam = searchParams.get('edited');
 
 	useEffect(() => {
 		if (recipeId == null) return;
@@ -24,7 +27,7 @@ const RecipePage: React.FC = () => {
 					navigate('/');
 				}
 			});
-	}, [recipeId]);
+	}, [recipeId, editedParam]);
 
 	if (recipe == null) {
 		return <></>;

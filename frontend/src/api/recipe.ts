@@ -1,14 +1,5 @@
 import api from '@/api';
-import Recipe from '@/types/Recipe';
-
-type RecipeToAddWithCategoriesAndIngredients = Pick<Recipe, 'title' | 'cookingTimeMinutes' | 'description'> & {
-	isPublic?: boolean;
-	location?: string;
-	latitude?: number;
-	longitude?: number;
-	categories: Array<string>,
-	ingredients: Array<string>
-};
+import RecipeToAddOrEdit from '@/types/RecipeToAddOrEdit.ts';
 
 const getPaginationUrlParams = ({page, limit}: {
 	page: number,
@@ -30,10 +21,16 @@ const getPaginationUrlParams = ({page, limit}: {
 	return params;
 };
 
-export const createRecipe = async (recipe: RecipeToAddWithCategoriesAndIngredients) => {
+export const createRecipe = async (recipe: RecipeToAddOrEdit) => {
 	const {data} = await api.post('/recipe', {...recipe});
 	return data;
 }
+
+export const updateRecipe = async (recipeId: number, recipe: RecipeToAddOrEdit) => {
+	const {data} = await api.put(`/recipe/${recipeId}`, {...recipe});
+	return data;
+}
+
 export const getRecipeById = async (id: number) => {
 	const {data} = await api.get(`/recipe/${id}`);
 	return data;

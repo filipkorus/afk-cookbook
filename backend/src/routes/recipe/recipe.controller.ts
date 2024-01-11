@@ -49,16 +49,6 @@ const recipeValidationSchemaObject = {
 		.trim()
 		.max(config.APP.RECIPE.LOCATION.LENGTH.MAX, `location must be shorter than ${config.APP.RECIPE.LOCATION.LENGTH.MAX} characters`)
 		.or(z.null()).default(null), // could be null
-	latitude: z
-		.number()
-		.min(config.APP.RECIPE.LATITUDE.MIN)
-		.max(config.APP.RECIPE.LATITUDE.MAX)
-		.or(z.null()).default(null), // could be null
-	longitude: z
-		.number()
-		.min(config.APP.RECIPE.LONGITUDE.MIN)
-		.max(config.APP.RECIPE.LONGITUDE.MAX)
-		.or(z.null()).default(null), // could be null
 	ingredients: z.array(
 		z.string()
 			.trim()
