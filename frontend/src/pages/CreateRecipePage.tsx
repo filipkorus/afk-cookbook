@@ -55,6 +55,7 @@ const CreateRecipePage: React.FC = ({}) => {
          </Box>}
 
 			<RecipeForm
+				action="create"
 				handleSubmit={handleSubmit}
 				errorFields={errorFields}
 				resetForm={resetForm}

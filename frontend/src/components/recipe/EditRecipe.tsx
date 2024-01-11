@@ -54,6 +54,7 @@ const EditRecipe: React.FC<EditRecipeProps> = ({recipeToEdit}) => {
          </Box>}
 
 			<RecipeForm
+				action="edit"
 				initialValues={{
 					title: recipeToEdit.title,
 					cookingTimeMinutes: recipeToEdit.cookingTimeMinutes,

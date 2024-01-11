@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import {getRecipeById} from '@/api/recipe.ts';
+import {getRecipeById} from '@/api/recipe';
 import {AxiosError} from 'axios';
 import RecipeCard, {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard';
 
@@ -19,8 +19,6 @@ const RecipePage: React.FC = () => {
 		getRecipeById(+recipeId)
 			.then(({recipe}) => setRecipe(recipe))
 			.catch((error) => {
-				console.error(error);
-
 				if (!(error instanceof AxiosError)) return;
 
 				if (error?.response?.status === 404) {
