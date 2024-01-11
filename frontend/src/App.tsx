@@ -63,7 +63,7 @@ const App = () => {
 
 				<Route path="search" element={
 					<DrawerView pageTitle="Search recipes">
-						<SearchPage />
+						<SearchPage/>
 					</DrawerView>
 				}/>
 
