@@ -6,8 +6,8 @@ import {z} from 'zod';
 import ReviewToAdd from '@/types/ReviewToAdd';
 import useForm from '@/hooks/useForm';
 import Review from '@/types/Review';
+import Action from '@/types/Action';
 
-type Action = 'create' | 'edit';
 type ReviewFormProps = {
 	action: Action,
 	onSubmit: (formData: ReviewToAdd) => any,

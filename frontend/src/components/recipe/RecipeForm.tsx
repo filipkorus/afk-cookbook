@@ -2,20 +2,25 @@ import React, {useEffect} from 'react';
 import {Alert, Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, TextField} from '@mui/material';
 import config from '@/config';
 import theme from '@/theme';
-import RecipeToAddOrEdit from '@/types/RecipeToAddOrEdit.ts';
+import RecipeToAddOrEdit from '@/types/RecipeToAddOrEdit';
 import useForm from '@/hooks/useForm';
 import useItemList from '@/hooks/useItemList';
 import ErrorFields from '@/types/ErrorFields';
+import Action from '@/types/Action';
+import {useNavigate} from 'react-router-dom';
 
 type RecipeFormProps = {
 	initialValues?: RecipeToAddOrEdit,
 	handleSubmit: (formData: RecipeToAddOrEdit) => any,
 	disableForm: boolean,
 	resetForm?: boolean,
-	errorFields: ErrorFields
+	errorFields: ErrorFields,
+	action: Action
 };
 
-const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, disableForm, errorFields, resetForm}) => {
+const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, disableForm, errorFields, resetForm, action}) => {
+	const navigate = useNavigate();
+
 	const fieldError = (fieldName: keyof RecipeToAddOrEdit) => errorFields.find(error => error.path[0] === fieldName);
 
 	const {
@@ -294,7 +299,17 @@ const RecipeForm: React.FC<RecipeFormProps> = ({initialValues, handleSubmit, dis
 
 		<Button style={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
 		        variant="outlined" type="submit"
-		        disabled={disableForm} fullWidth>Save</Button>
+		        disabled={disableForm} fullWidth>{action === 'edit' ? 'Save changes' : 'Submit'}</Button>
+
+		{action === 'edit' && <Box my={1}>
+          <Button
+              variant="outlined" type="button"
+              color="error"
+              onClick={() => navigate(-1)}
+              disabled={disableForm} fullWidth>
+              Cancel
+          </Button>
+      </Box>}
 	</form>;
 };
 
