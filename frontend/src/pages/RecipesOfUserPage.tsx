@@ -100,6 +100,7 @@ const RecipesOfUserPage: React.FC = () => {
 								if (!includePrivate) setIncludePrivate(true);
 							}}
 							checked={includePublic}
+							disabled={loading}
 						/>
 					}
 					label="Show my public recipes"
@@ -117,6 +118,7 @@ const RecipesOfUserPage: React.FC = () => {
 								if (!includePublic) setIncludePublic(true);
 							}}
 							checked={includePrivate}
+							disabled={loading}
 						/>
 					}
 					label="Show my private recipes"
@@ -125,7 +127,7 @@ const RecipesOfUserPage: React.FC = () => {
 		</Box>}
 
 		<RecipeListPagination
-			recipes={recipes ?? []}
+			recipes={recipes}
 			disablePagination={loading}
 			count={Math.ceil(totalPages)}
 			page={currentPage}

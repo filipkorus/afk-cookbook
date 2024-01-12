@@ -32,6 +32,8 @@ const ReviewComment: React.FC<ReviewCommentProps> = ({review, onUpdate}) => {
 	const handleEditSubmit = (formData: ReviewToAdd) => {
 		if (loading) return;
 
+		setLoading(true);
+
 		editReview({
 			review: formData,
 			reviewId: review.id
@@ -63,6 +65,8 @@ const ReviewComment: React.FC<ReviewCommentProps> = ({review, onUpdate}) => {
 		const deletingConfirmed = confirm('Are you sure to delete your review?');
 
 		if (!deletingConfirmed) return;
+
+		setLoading(true);
 
 		deleteReview(review.id)
 			.then(({success, msg}) => {

@@ -3,6 +3,7 @@ import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import {getRecipeById} from '@/api/recipe';
 import {AxiosError} from 'axios';
 import RecipeCard, {RecipeWithCategoriesIngredientsAuthorAndStars} from '@/components/recipe/RecipeCard';
+import RecipeSkeletonCard from '@/components/recipe/RecipeSkeletonCard.tsx';
 
 const RecipePage: React.FC = () => {
 	const {id: recipeId} = useParams();
@@ -28,7 +29,7 @@ const RecipePage: React.FC = () => {
 	}, [recipeId, editedParam]);
 
 	if (recipe == null) {
-		return <></>;
+		return <RecipeSkeletonCard />;
 	}
 
 	return <RecipeCard recipe={recipe} />;

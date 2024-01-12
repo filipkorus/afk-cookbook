@@ -79,7 +79,7 @@ const SidebarMenu: React.FC = () => {
 				icon={<DashboardIcon/>}
 			/>
 
-			<Box sx={{mt: 'auto'}}>
+			<Box mt={1}>
 				<Button
 					fullWidth
 					style={{
