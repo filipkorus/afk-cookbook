@@ -79,7 +79,7 @@ const RecipesOfUserPage: React.FC = () => {
 		setCurrentPage(page);
 	}
 
-	if (recipes == null || currentUser == null || userId == null) {
+	if (currentUser == null || userId == null) {
 		return <></>;
 	}
 
