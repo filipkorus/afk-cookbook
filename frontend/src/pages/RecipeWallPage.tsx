@@ -97,6 +97,10 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 		navigate(`?${query.toString()}`);
 	}, [currentPage]);
 
+	useEffect(() => {
+		setRecipes(null);
+	}, [currentPage]);
+
 	if (names?.length === 1) {
 		return <Navigate to={`/${wallType}/${names[0]}`}/>;
 	}
@@ -105,17 +109,19 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 		setCurrentPage(page);
 	}
 
-	if (recipes == null || currentUser == null) {
+	if (currentUser == null) {
 		return <></>;
 	}
 
 	return <>
-		<Box mx={2}>
+		{<Box mx={2}>
 			<FormGroup>
 				<FormControlLabel
 					control={
 						<Checkbox
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								setRecipes(null);
+
 								const {checked} = e.target;
 								setIncludeMyRecipes(checked);
 								if (checked) {
@@ -124,15 +130,16 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 								setCurrentPage(config.APP.PAGINATION.STARTING_PAGE_NUMBER);
 							}}
 							checked={includeMyRecipes}
+							disabled={loading || recipes == null}
 						/>
 					}
 					label="Show my public recipes"
 				/>
 			</FormGroup>
-		</Box>
+		</Box>}
 
 		<RecipeListPagination
-			recipes={recipes ?? []}
+			recipes={recipes}
 			disablePagination={loading}
 			count={Math.ceil(totalPages)}
 			page={currentPage}

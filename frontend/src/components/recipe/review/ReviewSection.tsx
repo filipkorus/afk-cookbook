@@ -70,6 +70,10 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 			.finally(() => setLoading(false));
 	}, [openReviews, currentPage]);
 
+	useEffect(() => {
+		setReviews(null);
+	}, [currentPage]);
+
 	const refreshStars = (forceRefresh?: boolean) => {
 		if (!forceRefresh && stars != null) return;
 
@@ -95,19 +99,19 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 				        size="small"
 				        fullWidth
 				        onClick={() => setOpenReviews(prev => !prev)}
-				        disabled={loading}
+				        disabled={loading && !openReviews}
 				>
 					Reviews
 				</Button>
 			</Grid>
 
-			{openReviews && reviews &&
+			{openReviews &&
              <>
                  <Grid item xs={12}>
                      <Divider color="gray"/>
 
                      <Box p={3}>
-								{recipe.author.id !== currentUser.id &&
+								{(!loading || currentUserReview != null) && recipe.author.id !== currentUser.id &&
                             <Box m={1}>
 										 {currentUserReview ?
 											 <ReviewComment
@@ -125,11 +129,11 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 												 }}
 											 />
 										 }
-										 {reviews.length > 0 && <Divider sx={{margin: '1rem'}}/>}
+										 {reviews != null && reviews.length > 0 && <Divider sx={{margin: '1rem'}}/>}
                             </Box>
 								}
 
-								{reviews.length === 0 && currentUser.id === recipe.author.id &&
+								{reviews?.length === 0 && currentUser.id === recipe.author.id &&
                             <Typography variant="subtitle1">No reviews yet...</Typography>
 								}
 
@@ -147,8 +151,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
              </>
 			}
 		</Grid>
-
-
 	</>;
 };
 

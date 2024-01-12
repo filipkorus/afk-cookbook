@@ -48,6 +48,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 			<Rating
 				name="stars"
 				value={formData.stars}
+				disabled={disableForm}
 				onChange={
 					(event: React.SyntheticEvent, value: number | null) => {
 						if (
