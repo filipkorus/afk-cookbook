@@ -70,6 +70,10 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({recipe}) => {
 			.finally(() => setLoading(false));
 	}, [openReviews, currentPage]);
 
+	useEffect(() => {
+		setReviews(null);
+	}, [currentPage]);
+
 	const refreshStars = (forceRefresh?: boolean) => {
 		if (!forceRefresh && stars != null) return;
 

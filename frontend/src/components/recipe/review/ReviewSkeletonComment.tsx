@@ -7,14 +7,12 @@ const ReviewSkeletonComment: React.FC = () => {
 			<Skeleton animation="wave" variant="circular" width={40} height={40}/>
 		</Grid>
 		<Grid justifyContent="left" item xs zeroMinWidth>
-			<Typography m={0} textAlign="left" variant="subtitle2"
-			            sx={{cursor: 'pointer'}}
-			>
+			<Typography m={0} textAlign="left" variant="subtitle2">
 				<Skeleton />
 			</Typography>
 
 			<Skeleton variant="rectangular" width="100%" animation="wave">
-				<div style={{ paddingTop: '17%' }} />
+				<div style={{ paddingTop: '10%' }} />
 			</Skeleton>
 		</Grid>
 	</Grid>;

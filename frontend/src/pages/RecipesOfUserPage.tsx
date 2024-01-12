@@ -75,11 +75,15 @@ const RecipesOfUserPage: React.FC = () => {
 		navigate(`?${query.toString()}`);
 	}, [currentPage]);
 
+	useEffect(() => {
+		setRecipes(null);
+	}, [currentPage]);
+
 	const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
 		setCurrentPage(page);
 	}
 
-	if (recipes == null || currentUser == null || userId == null) {
+	if (currentUser == null || userId == null) {
 		return <></>;
 	}
 
@@ -92,6 +96,8 @@ const RecipesOfUserPage: React.FC = () => {
 					control={
 						<Checkbox
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								setRecipes(null);
+
 								const {checked} = e.target;
 								setIncludePublic(checked);
 								if (checked) {
@@ -110,6 +116,8 @@ const RecipesOfUserPage: React.FC = () => {
 					control={
 						<Checkbox
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								setRecipes(null);
+
 								const {checked} = e.target;
 								setIncludePrivate(checked);
 								if (checked) {
