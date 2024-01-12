@@ -105,12 +105,12 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 		setCurrentPage(page);
 	}
 
-	if (recipes == null || currentUser == null) {
+	if (currentUser == null) {
 		return <></>;
 	}
 
 	return <>
-		<Box mx={2}>
+		{recipes != null && <Box mx={2}>
 			<FormGroup>
 				<FormControlLabel
 					control={
@@ -124,15 +124,16 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 								setCurrentPage(config.APP.PAGINATION.STARTING_PAGE_NUMBER);
 							}}
 							checked={includeMyRecipes}
+							disabled={loading}
 						/>
 					}
 					label="Show my public recipes"
 				/>
 			</FormGroup>
-		</Box>
+		</Box>}
 
 		<RecipeListPagination
-			recipes={recipes ?? []}
+			recipes={recipes}
 			disablePagination={loading}
 			count={Math.ceil(totalPages)}
 			page={currentPage}
