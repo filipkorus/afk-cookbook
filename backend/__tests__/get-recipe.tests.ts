@@ -39,9 +39,20 @@ describe("GET /recipe", () => {
         expect(recipes.every(recipe => recipe.isPublic === true)).toBe(true);
     })
 
-    test("Authorized user trying to enter invalid data in request", async () => {
+    test("Authorized user enters page as string", async () => {
         const response = await supertest(app).get("/recipe").query(
             {page: 'xd'}
+        ).set('Authorization', "Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
+        console.dir(response.body)
+        expect(response.status).toBe(400);
+        expect(response.body.success).toBe(false);
+        expect(response.body.msg).toBe("page number OR maximum of recipes for page param is required")
+    })
+
+    test("Authorized user enters page as float", async () => {
+        const response = await supertest(app).get("/recipe").query(
+            {page: 3.14}
         ).set('Authorization', "Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
         console.dir(response.body)
