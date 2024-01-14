@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useLocation, useNavigate, useParams} from 'react-router-dom';
+import {Navigate, useLocation, useNavigate, useParams} from 'react-router-dom';
 import {useAuth} from '@/context/AuthContext';
 import config from '@/config';
 import {Box, Checkbox, FormControlLabel, FormGroup} from '@mui/material';
@@ -25,6 +25,10 @@ const RecipesOfUserPage: React.FC = () => {
 	const [totalPages, setTotalPages] = useState<number>(0);
 	const [currentPage, setCurrentPage] = useState<number>(
 		Math.max(1, +(query.get('p') ?? 1)));
+
+	if (!Number.isInteger(Number(userId))) {
+		return <Navigate to="/" />;
+	}
 
 	const getRecipesByUserIdHandler = () => {
 		if (userId == null) return;

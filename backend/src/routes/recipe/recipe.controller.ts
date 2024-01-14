@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import {
 	BAD_REQUEST,
 	CREATED,
-	MISSING_BODY_FIELDS,
+	MISSING_BODY_FIELDS, MISSING_QUERY_PARAMS,
 	NOT_FOUND,
 	SERVER_ERROR,
 	SUCCESS
@@ -187,8 +187,12 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 
 	const validatedReqQuery = validateObject(ValidationSchema, req.query);
 
+	if (validatedReqQuery.data == null) {
+		return MISSING_QUERY_PARAMS(res, validatedReqQuery.errors);
+	}
+
 	if (validatedReqQuery.data?.page == null && validatedReqQuery.data?.limit == null) {
-		return BAD_REQUEST(res, 'page number OR maximum of recipes for page param is required');
+		return BAD_REQUEST(res, 'page OR page param is required');
 	}
 
 	const userId = validatedReqQuery.data?.userId ?? null;
@@ -282,8 +286,12 @@ export const GetRecipesByIngredientOrCategoryNameHandler = (searchBy: SearchReci
 
 		const validatedReqQuery = validateObject(ValidationSchema, req.query);
 
+		if (validatedReqQuery.data == null) {
+			return MISSING_QUERY_PARAMS(res, validatedReqQuery.errors);
+		}
+
 		if (validatedReqQuery.data?.page == null && validatedReqQuery.data?.limit == null) {
-			return BAD_REQUEST(res, 'page number OR maximum of recipes for page param is required');
+			return BAD_REQUEST(res, 'page OR page param is required');
 		}
 
 		if (name == null) {
@@ -396,8 +404,12 @@ export const GetRecipesByIngredientOrCategoryNamesListHandler = (searchBy: Searc
 
 		const validatedReqQuery = validateObject(ValidationSchema, req.query);
 
+		if (validatedReqQuery.data == null) {
+			return MISSING_QUERY_PARAMS(res, validatedReqQuery.errors);
+		}
+
 		if (validatedReqQuery.data?.page == null && validatedReqQuery.data?.limit == null) {
-			return BAD_REQUEST(res, 'page number OR maximum of recipes for page param is required');
+			return BAD_REQUEST(res, 'page OR page param is required');
 		}
 
 		const {startIndex, page, limit} = paginationParams({
