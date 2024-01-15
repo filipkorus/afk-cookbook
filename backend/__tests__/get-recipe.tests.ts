@@ -45,28 +45,30 @@ describe("GET /recipe", () => {
             {page: 'xd'}
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
+
         console.dir(response.body)
         expect(response.status).toBe(400);
         expect(response.body.success).toBe(false);
-        expect(response.body.msg).toBe("page number OR maximum of recipes for page param is required")
+        expect(response.body.msg).toBe("Some query params are missing or invalid")
     })
 
     test("Authorized user enters page as float", async () => {
         const response = await supertest(app).get("/recipe").query(
             {page: 3.14}
-        ).set('Authorization', "Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
         console.dir(response.body)
         expect(response.status).toBe(400);
         expect(response.body.success).toBe(false);
-        expect(response.body.msg).toBe("page number OR maximum of recipes for page param is required")
+        expect(response.body.msg).toBe("Some query params are missing or invalid")
     })
 
-    test("Authorized user fetches recipies of nonexistent user", async () => {
+    test("Authorized user fetches recipes of nonexistent user", async () => {
         const response = await supertest(app).get("/recipe").query(
             { page: 1,
               userId: 9999}
-        ).set('Authorization', "Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
+
 
         console.dir(response.body)
         expect(response.status).toBe(400);
