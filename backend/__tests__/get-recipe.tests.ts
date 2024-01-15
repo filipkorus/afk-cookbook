@@ -61,6 +61,18 @@ describe("GET /recipe", () => {
         expect(response.body.msg).toBe("page number OR maximum of recipes for page param is required")
     })
 
+    test("Authorized user fetches recipies of nonexistent user", async () => {
+        const response = await supertest(app).get("/recipe").query(
+            { page: 1,
+              userId: 9999}
+        ).set('Authorization', "Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
+        console.dir(response.body)
+        expect(response.status).toBe(400);
+        expect(response.body.success).toBe(false);
+        expect(response.body.msg).toContain("No more pages")
+    })
+
 
 
 
