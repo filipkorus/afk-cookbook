@@ -2,6 +2,7 @@ import supertest from 'supertest'
 import app from '../src/server'
 import { describe, test, expect } from '@jest/globals';
 import {Recipe} from '@prisma/client';
+import config from '../config';
 
 
 describe("GET /recipe", () => {
@@ -30,7 +31,7 @@ describe("GET /recipe", () => {
                 categoryName: null,
                 ingredientName: null,
                 }
-        ).set('Authorization', "Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
@@ -42,7 +43,7 @@ describe("GET /recipe", () => {
     test("Authorized user enters page as string", async () => {
         const response = await supertest(app).get("/recipe").query(
             {page: 'xd'}
-        ).set('Authorization', "Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
         console.dir(response.body)
         expect(response.status).toBe(400);

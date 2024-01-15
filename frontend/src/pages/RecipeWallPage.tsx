@@ -33,7 +33,7 @@ const RecipeWallPage: React.FC<RecipeWallPageProps> = ({wallType}) => {
 	const [recipes, setRecipes] = useState<Array<RecipeWithCategoriesIngredientsAuthorAndStars> | null>(null);
 	const [totalPages, setTotalPages] = useState<number>(config.APP.PAGINATION.STARTING_PAGE_NUMBER);
 
-	const pParam = +(query.get('p') ?? config.APP.PAGINATION.STARTING_PAGE_NUMBER);
+	const pParam = Math.floor(+(query.get('p') ?? config.APP.PAGINATION.STARTING_PAGE_NUMBER));
 	const [currentPage, setCurrentPage] = useState<number>(
 		Math.max(
 			1,
