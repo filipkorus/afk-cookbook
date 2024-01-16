@@ -3,7 +3,7 @@ import {
 	BAD_REQUEST,
 	CONFLICT,
 	CREATED,
-	MISSING_BODY_FIELDS,
+	MISSING_BODY_FIELDS, MISSING_QUERY_PARAMS,
 	NOT_FOUND, SERVER_ERROR,
 	SUCCESS
 } from '../../../utils/httpCodeResponses/messages';
@@ -33,8 +33,12 @@ export const GetReviewsByRecipeIdHandler = async (req: Request, res: Response) =
 
 	const validatedReqQuery = validateObject(ValidationSchema, req.query);
 
+	if (validatedReqQuery.data == null) {
+		return MISSING_QUERY_PARAMS(res, validatedReqQuery.errors);
+	}
+
 	if (validatedReqQuery.data?.page == null && validatedReqQuery.data?.limit == null) {
-		return BAD_REQUEST(res, 'page number OR maximum of recipes for page param is required');
+		return BAD_REQUEST(res, 'page OR page param is required');
 	}
 
 	const {startIndex, page, limit} = paginationParams({

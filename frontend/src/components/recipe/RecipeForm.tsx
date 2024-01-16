@@ -1,5 +1,16 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Alert, Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, TextField} from '@mui/material';
+import {
+	Alert,
+	Box,
+	Button,
+	Checkbox,
+	Divider,
+	FormControlLabel,
+	FormGroup,
+	Grid,
+	InputAdornment,
+	TextField
+} from '@mui/material';
 import config from '@/config';
 import theme from '@/theme';
 import RecipeToAddOrEdit from '@/types/RecipeToAddOrEdit';
@@ -29,7 +40,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 	                                               action
                                                }) => {
 	const navigate = useNavigate();
-	const locateButtonRef = useRef<HTMLButtonElement | null>(null);
+	const [locationButtonState, setLocationButtonState] = useState<'none' | 'hidden' | 'disabled'>('none');
 
 	const fieldError = (fieldName: keyof RecipeToAddOrEdit) => errorFields.find(error => error.path[0] === fieldName);
 
@@ -207,12 +218,14 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 			<TextField
 				variant="outlined"
 				required
-				label="Time needed"
+				label="Time needed (minutes)"
 				name="cookingTimeMinutes"
 				type="number"
 				inputProps={{
 					inputMode: 'numeric',
-					pattern: '[0-9]*',
+					pattern: '[1-9][0-9]*',
+					min: config.APP.RECIPE.COOKING_TIME_MINUTES.MIN,
+					max: config.APP.RECIPE.COOKING_TIME_MINUTES.MAX
 				}}
 				error={fieldError('cookingTimeMinutes') != null}
 				helperText={fieldError('cookingTimeMinutes')?.message}
@@ -261,7 +274,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 					name="location"
 					onChange={handleInputChange}
 					value={formData.location}
-					disabled={disableForm}
+					disabled={disableForm || locationButtonState === 'disabled'}
 					inputProps={{maxLength: config.APP.RECIPE.LOCATION.LENGTH.MAX}}
 					error={fieldError('location') != null}
 					helperText={fieldError('location')?.message}
@@ -269,14 +282,13 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 					sx={{mb: 1}}
 				/>
 
-				<Button
+				{locationButtonState !== 'hidden' && <Button
 					variant="outlined" type="button"
-					ref={locateButtonRef}
 					style={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
 					onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-						if (locateButtonRef.current instanceof HTMLButtonElement) {
-							locateButtonRef.current.disabled = true;
-						}
+						if (locationButtonState !== 'none') return;
+
+						setLocationButtonState('disabled');
 
 						navigator.geolocation.getCurrentPosition(
 							position => {
@@ -295,21 +307,18 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 										});
 
 										// hide button
-										if (locateButtonRef.current instanceof HTMLButtonElement) {
-											locateButtonRef.current.style.display = 'none';
-										}
-									});
+										setLocationButtonState('hidden');
+									})
+									.catch(error => setLocationButtonState('none'));
 							},
-							err => alert(`Unable to retrieve location. Reason: ${err.message.toLowerCase()}.`)
-						);
-
-						if (locateButtonRef.current instanceof HTMLButtonElement) {
-							locateButtonRef.current.disabled = false;
-						}
+							err => {
+								alert(`Unable to retrieve location. Reason: ${err.message.toLowerCase()}.`);
+								setLocationButtonState('none');
+							});
 					}}
-					disabled={disableForm ?? locateButtonRef.current?.disabled} fullWidth>
+					disabled={disableForm || locationButtonState === 'disabled'} fullWidth>
 					Use my current location
-				</Button>
+				</Button>}
 			</Box>
 
 			<Divider/>

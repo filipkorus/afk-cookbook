@@ -16,7 +16,9 @@ export const CREATED = (res: Response, message: string | undefined = undefined, 
 
 export const BAD_REQUEST = (res: Response, message: string | undefined = undefined, data: object = {}) => respond(res, message ?? "Bad request", 400, data);
 
-export const MISSING_BODY_FIELDS = (res: Response, errors: Array<ZodIssue | ZodError> = []) => respond(res, "Missing body fields", 400, {errors});
+export const MISSING_BODY_FIELDS = (res: Response, errors: Array<ZodIssue | ZodError> = []) => respond(res, "Some body fields are missing or invalid", 400, {errors});
+
+export const MISSING_QUERY_PARAMS = (res: Response, errors: Array<ZodIssue | ZodError> = []) => respond(res, "Some query params are missing or invalid", 400, {errors});
 
 export const VALIDATION_ERROR = (res: Response, errors: Array<ZodIssue | ZodError> = []) => respond(res, "Validation error", 400, {errors});
 
