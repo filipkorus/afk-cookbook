@@ -40,7 +40,7 @@ describe("GET /recipe", () => {
         expect(recipes.every(recipe => recipe.isPublic === true)).toBe(true);
     })
 
-    test("Authorized user enters page as string", async () => {
+    test("Authorized user enters page param as string", async () => {
         const response = await supertest(app).get("/recipe").query(
             {page: 'xd'}
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
@@ -52,7 +52,7 @@ describe("GET /recipe", () => {
         expect(response.body.msg).toBe("Some query params are missing or invalid")
     })
 
-    test("Authorized user enters page as float", async () => {
+    test("Authorized user enters page param as float", async () => {
         const response = await supertest(app).get("/recipe").query(
             {page: 3.14}
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
