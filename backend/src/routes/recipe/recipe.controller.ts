@@ -38,7 +38,8 @@ const recipeValidationSchemaObject = {
 		.max(config.APP.RECIPE.TITLE.LENGTH.MAX, `title must be shorter than ${config.APP.RECIPE.TITLE.LENGTH.MAX} characters`),
 	cookingTimeMinutes: z
 		.number({required_error: 'cooking time is required'})
-		.min(1, 'cooking time must be positive'),
+		.min(config.APP.RECIPE.COOKING_TIME_MINUTES.MIN, 'cooking time must be positive')
+		.max(config.APP.RECIPE.COOKING_TIME_MINUTES.MAX, `cooking time must be less than ${config.APP.RECIPE.COOKING_TIME_MINUTES.MAX}`),
 	description: z
 		.string({required_error: 'description is required'})
 		.trim()

@@ -18,6 +18,7 @@ const config = {
 		},
 		RECIPE: {
 			TITLE: {LENGTH: {MIN: 5, MAX: 255}},
+			COOKING_TIME_MINUTES: {MIN:1, MAX:100_000},
 			DESCRIPTION: {LENGTH: {MIN: 10}},
 			LOCATION: {LENGTH: {MAX: 255}},
 			LATITUDE: {MIN: -90, MAX: 90},
