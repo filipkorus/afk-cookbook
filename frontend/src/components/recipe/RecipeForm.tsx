@@ -222,10 +222,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 				name="cookingTimeMinutes"
 				type="number"
 				inputProps={{
-					inputMode: 'numeric',
-					pattern: '[1-9][0-9]*',
-					min: config.APP.RECIPE.COOKING_TIME_MINUTES.MIN,
-					max: config.APP.RECIPE.COOKING_TIME_MINUTES.MAX
+					inputMode: 'numeric'
 				}}
 				error={fieldError('cookingTimeMinutes') != null}
 				helperText={fieldError('cookingTimeMinutes')?.message}
@@ -363,14 +360,14 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 
 		<Button style={{color: theme.palette.primary.main, borderColor: theme.palette.primary.main}}
 		        variant="outlined" type="submit"
-		        disabled={disableForm} fullWidth>{action === 'edit' ? 'Save changes' : 'Submit'}</Button>
+		        disabled={disableForm || locationButtonState === 'disabled'} fullWidth>{action === 'edit' ? 'Save changes' : 'Submit'}</Button>
 
 		{action === 'edit' && <Box my={1}>
           <Button
               variant="outlined" type="button"
               color="error"
               onClick={() => navigate(-1)}
-              disabled={disableForm} fullWidth>
+              disabled={disableForm || locationButtonState === 'disabled'} fullWidth>
               Cancel
           </Button>
       </Box>}
