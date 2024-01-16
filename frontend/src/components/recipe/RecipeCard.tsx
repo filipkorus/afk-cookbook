@@ -65,7 +65,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({recipe, wallCard}) => {
 		() => navigate(`/recipe/user/${recipe.author.id}`);
 	const authorProfileClickTitle = alreadyViewingAuthorProfile ? '' : `Click to see profile of ${recipe.author.name}`;
 
-	return <>{actionParam === 'edit' ?
+	return <>{actionParam === 'edit' && recipe.author.id === currentUser.id ?
 		<EditRecipe recipeToEdit={recipe}/> :
 		<Card>
 			<CardHeader
