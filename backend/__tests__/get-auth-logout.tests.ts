@@ -19,7 +19,7 @@ describe("GET /auth/logout", () => {
     test("Unauthorized users cookie gets maxage 0 and is expired", async () => {
         const response = await supertest(app).get("/auth/logout")
         .set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
-                
+
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
         const setCookieHeaders = response.headers['set-cookie'] as unknown;
@@ -27,6 +27,7 @@ describe("GET /auth/logout", () => {
 
         const setCookieHeader = (setCookieHeaders as string[])[0];
         expect(setCookieHeader).toContain('Max-Age=0');
+        expect(setCookieHeader).toContain('refreshToken=;');
 
         const expiresMatch = /Expires=([^;]+)/.exec(setCookieHeader);
         expect(expiresMatch).toBeTruthy();

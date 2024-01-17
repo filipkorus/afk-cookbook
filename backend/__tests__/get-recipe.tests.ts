@@ -27,11 +27,26 @@ describe("GET /recipe", () => {
                 {
                 page: 1,
                 limit: 10,
-                excludeMyRecipes: false,
-                categoryName: null,
-                ingredientName: null,
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
+
+        console.log(response.body);
+
+        const bodyProperties = ['page', 'limit', 'totalRecipes', 'totalPages', 'recipes']
+        
+        for (const property of bodyProperties) {
+            expect(response.body).toHaveProperty(property);
+        }
+
+        const recipeProperties = ['author', 'id', 'title',
+        'cookingTimeMinutes', 'description', 'isPublic', 'createdAt', 'location',
+        'userId', 'categories', 'ingredients', 'stars']
+    
+        for (const recipe of response.body.recipes) {
+            for (const property of recipeProperties) {
+                expect(recipe).toHaveProperty(property);
+            }
+        }
 
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
@@ -76,11 +91,117 @@ describe("GET /recipe", () => {
         expect(response.body.msg).toContain("No more pages")
     })
 
+    test("Authorized user fetches recipes with limit over 25", async () => {
+        const response = await supertest(app).get("/recipe").query(
+            { page: 1,
+              limit: 30}
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
+        expect(response.status).toBe(200);
+        expect(response.body.limit).toBe(25);
+        expect(response.body.success).toBe(true);
+
+        const bodyProperties = ['page', 'limit', 'totalRecipes', 'totalPages', 'recipes']
+        
+        for (const property of bodyProperties) {
+            expect(response.body).toHaveProperty(property);
+        }
+
+        const recipeProperties = ['author', 'id', 'title',
+        'cookingTimeMinutes', 'description', 'isPublic', 'createdAt', 'location',
+        'userId', 'categories', 'ingredients', 'stars']
+    
+        for (const recipe of response.body.recipes) {
+            expect(recipe.isPublic).toBe(true)
+            for (const property of recipeProperties) {
+                expect(recipe).toHaveProperty(property);
+            }
+        }
+    })
+
+    test("Authorized user fetches public recipes with other userid", async () => {
+        const response = await supertest(app).get("/recipe").query(
+            { page: 1,
+              userId: 3}
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
+
+        console.dir(response.body);
+        
+
+        expect(response.status).toBe(200);
+        expect(response.body.limit).toBe(3);
+        expect(response.body.success).toBe(true);
+
+        const bodyProperties = ['page', 'limit', 'totalRecipes', 'totalPages', 'recipes']
+        
+        for (const property of bodyProperties) {
+            expect(response.body).toHaveProperty(property);
+        }
+
+        const recipeProperties = ['author', 'id', 'title',
+        'cookingTimeMinutes', 'description', 'isPublic', 'createdAt', 'location',
+        'userId', 'categories', 'ingredients', 'stars']
+    
+        for (const recipe of response.body.recipes) {
+            expect(recipe.isPublic).toBe(true);
+            expect(recipe.author).toBe(!config.TEST.USER_ID)
+            
+            for (const property of recipeProperties) {
+                expect(recipe).toHaveProperty(property);
+  
+            }
+        }
+    })
+
+    test("Authorized user fetches non-public recipes with other userid", async () => {
+        const response = await supertest(app).get("/recipe").query(
+            { page: 1,
+              userId: 3,
+              includePublic: false}
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
+
+        console.dir(response.body);
+        
+
+        expect(response.status).toBe(404);
+        expect(response.body.limit).toBe(3);
+        expect(response.body.success).toBe(false);
+    })
+
+    test("Authorized user fetches no public and no private recipes with other userid", async () => {
+        const response = await supertest(app).get("/recipe").query(
+            { page: 1,
+              userId: 3,
+              includePublic: false,
+              includePrivate: false}
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
+
+        console.dir(response.body);
+        
+
+        expect(response.status).toBe(404);
+        expect(response.body.limit).toBe(3);
+        expect(response.body.success).toBe(false);
+    })
+
+    test("Authorized user fetches private recipes ", async () => {
+        const response = await supertest(app).get("/recipe").query(
+            { page: 1,
+              includePublic: false,
+            }
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
+
+        console.dir(response.body);
+        
+
+        expect(response.status).toBe(404);
+        expect(response.body.limit).toBe(3);
+        expect(response.body.success).toBe(false);
+
+    })
 
 
 
 
 })
 
-//  .set('Authorization', "Bearer aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
