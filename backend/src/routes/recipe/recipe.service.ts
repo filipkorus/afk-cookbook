@@ -297,6 +297,7 @@ export const getRecipesByUserIdWithAuthors = ({startIndex, limit, includePublic,
 	includePrivate?: boolean,
 	userId: number,
 }) => {
+	console.log(includePublic, includePrivate)
 	if (!includePublic && !includePrivate) {
 		return Promise.resolve([]);
 	}
