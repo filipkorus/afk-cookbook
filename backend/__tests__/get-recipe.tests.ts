@@ -121,9 +121,9 @@ describe("GET /recipe", () => {
         const response = await supertest(app).get("/recipe").query(
             { page: 1,
               limit: 25,
-              userId: 3}
+              userId: 3
+            }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
-
 
         expect(response.status).toBe(200);
         expect(response.body.limit).toBe(25);
@@ -141,7 +141,7 @@ describe("GET /recipe", () => {
     
         for (const recipe of response.body.recipes) {
             expect(recipe.isPublic).toBe(true);
-            expect(recipe.author).toBe(!config.TEST.USER_ID)
+            expect(recipe.author.id).not.toBe(config.TEST.USER_ID)
             
             for (const property of recipeProperties) {
                 expect(recipe).toHaveProperty(property);
@@ -158,6 +158,8 @@ describe("GET /recipe", () => {
               includePublic: false}
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
+        console.dir(response.body);
+        
 
         expect(response.status).toBe(404);
         expect(response.body.limit).toBe(25);
