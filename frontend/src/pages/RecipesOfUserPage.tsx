@@ -24,7 +24,7 @@ const RecipesOfUserPage: React.FC = () => {
 	const [recipes, setRecipes] = useState<Array<RecipeWithCategoriesIngredientsAuthorAndStars> | null>(null);
 	const [totalPages, setTotalPages] = useState<number>(0);
 	const [currentPage, setCurrentPage] = useState<number>(
-		Math.max(1, +(query.get('p') ?? 1)));
+		Math.max(1, Math.floor(+(query.get('p') ?? 1))));
 
 	if (!Number.isInteger(Number(userId))) {
 		return <Navigate to="/" />;

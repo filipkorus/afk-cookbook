@@ -17,6 +17,10 @@ const RecipePage: React.FC = () => {
 	useEffect(() => {
 		if (recipeId == null) return;
 
+		if (!Number.isInteger(Number(recipeId))) {
+			return navigate('/');
+		}
+
 		getRecipeById(+recipeId)
 			.then(({recipe}) => setRecipe(recipe))
 			.catch((error) => {
@@ -29,10 +33,10 @@ const RecipePage: React.FC = () => {
 	}, [recipeId, editedParam]);
 
 	if (recipe == null) {
-		return <RecipeSkeletonCard />;
+		return <RecipeSkeletonCard/>;
 	}
 
-	return <RecipeCard recipe={recipe} />;
+	return <RecipeCard recipe={recipe}/>;
 };
 
 export default RecipePage;
