@@ -69,11 +69,11 @@ export const getRecipes = async ({page, limit, excludeMyRecipes, categoryName, i
 		}
 
 		if (categoryName != null) {
-			return `/recipe/category/${categoryName}?${params}`;
+			return `/recipe/category/${encodeURIComponent(categoryName)}?${params}`;
 		}
 
 		if (ingredientName != null) {
-			return `/recipe/ingredient/${ingredientName}?${params}`;
+			return `/recipe/ingredient/${encodeURIComponent(ingredientName)}?${params}`;
 		}
 
 		return `/recipe?${params}`;
