@@ -36,7 +36,18 @@ describe("POST /recipe", () => {
         console.log(response.body);
         
 
+
         expect(response.status).toBe(201);
         expect(response.body.success).toBe(true);
+        expect(response.body.msg).toBe('Recipe created successfully')
+
+        const recipeProperties = ['ingredients', 'categories', 'id',
+        'title', 'cookingTimeMinutes', 'description', 'isPublic',
+        'createdAt', 'location', 'userId']
+        
+        for (const property of recipeProperties) {
+            expect(response.body.data.recipe).toHaveProperty(property);
+        }
+
     })
 })
