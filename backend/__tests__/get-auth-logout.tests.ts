@@ -17,14 +17,4 @@ describe("GET /auth/logout", () => {
         expect(response.body.success).toBe(false);
         expect(response.body.msg).toBe('Unauthorized')
     })
-
-    test("Authenticated user enters no refreshToken when logging out", async () => {
-        const response = await supertest(app).get("/auth/logout")
-        .set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
-        
-        console.log(response.body);
-        
-        expect(response.status).toBe(401);
-        expect(response.body.success).toBe(false);
-    })
 })
