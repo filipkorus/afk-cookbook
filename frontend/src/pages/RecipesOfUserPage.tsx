@@ -23,11 +23,16 @@ const RecipesOfUserPage: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(false);
 	const [recipes, setRecipes] = useState<Array<RecipeWithCategoriesIngredientsAuthorAndStars> | null>(null);
 	const [totalPages, setTotalPages] = useState<number>(0);
+	const pParam = query.get('p');
 	const [currentPage, setCurrentPage] = useState<number>(
-		Math.max(1, Math.floor(+(query.get('p') ?? 1))));
+		Math.max(1, Math.floor(
+			(pParam == null || !Number.isInteger(Number(pParam)) ?
+					1 :
+					+pParam
+			))));
 
 	if (!Number.isInteger(Number(userId))) {
-		return <Navigate to="/" />;
+		return <Navigate to="/"/>;
 	}
 
 	const getRecipesByUserIdHandler = () => {
@@ -94,49 +99,49 @@ const RecipesOfUserPage: React.FC = () => {
 	return <>
 
 		{(+userId) === currentUser.id &&
-			<Box mx={2}>
-			<FormGroup>
-				<FormControlLabel
-					control={
-						<Checkbox
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-								setRecipes(null);
+          <Box mx={2}>
+              <FormGroup>
+                  <FormControlLabel
+                      control={
+								 <Checkbox
+									 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+										 setRecipes(null);
 
-								const {checked} = e.target;
-								setIncludePublic(checked);
-								if (checked) {
-									return;
-								}
-								if (!includePrivate) setIncludePrivate(true);
-							}}
-							checked={includePublic}
-							disabled={loading}
-						/>
-					}
-					label="Show my public recipes"
-				/>
+										 const {checked} = e.target;
+										 setIncludePublic(checked);
+										 if (checked) {
+											 return;
+										 }
+										 if (!includePrivate) setIncludePrivate(true);
+									 }}
+									 checked={includePublic}
+									 disabled={loading}
+								 />
+							 }
+                      label="Show my public recipes"
+                  />
 
-				<FormControlLabel
-					control={
-						<Checkbox
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-								setRecipes(null);
+                  <FormControlLabel
+                      control={
+								 <Checkbox
+									 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+										 setRecipes(null);
 
-								const {checked} = e.target;
-								setIncludePrivate(checked);
-								if (checked) {
-									return;
-								}
-								if (!includePublic) setIncludePublic(true);
-							}}
-							checked={includePrivate}
-							disabled={loading}
-						/>
-					}
-					label="Show my private recipes"
-				/>
-			</FormGroup>
-		</Box>}
+										 const {checked} = e.target;
+										 setIncludePrivate(checked);
+										 if (checked) {
+											 return;
+										 }
+										 if (!includePublic) setIncludePublic(true);
+									 }}
+									 checked={includePrivate}
+									 disabled={loading}
+								 />
+							 }
+                      label="Show my private recipes"
+                  />
+              </FormGroup>
+          </Box>}
 
 		<RecipeListPagination
 			recipes={recipes}
