@@ -216,9 +216,7 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 			startIndex,
 			limit,
 			userId: +userId,
-			includePublic: validatedReqQuery.data?.includePublic === 'true' || (
-				(validatedReqQuery.data?.includePublic === 'false' || validatedReqQuery.data?.includePublic == null) && (validatedReqQuery.data?.includePrivate === 'false' || validatedReqQuery.data?.includePrivate == null)
-			),
+			includePublic: validatedReqQuery.data?.includePublic === 'true',
 			includePrivate: validatedReqQuery.data?.includePrivate === 'true' && res.locals.user.id === +userId // currently logged user can only get public recipes of other user
 		}) : getPublicRecipesWithAuthors({
 			startIndex,
@@ -228,9 +226,7 @@ export const GetRecipesHandler = async (req: Request, res: Response) => {
 		}),
 		userId != null ? getRecipesByUserIdCount({
 			userId: +userId,
-			includePublic: validatedReqQuery.data?.includePublic === 'true' || (
-				(validatedReqQuery.data?.includePublic === 'false' || validatedReqQuery.data?.includePublic == null) && (validatedReqQuery.data?.includePrivate === 'false' || validatedReqQuery.data?.includePrivate == null)
-			),
+			includePublic: validatedReqQuery.data?.includePublic === 'true',
 			includePrivate: validatedReqQuery.data?.includePrivate === 'true' && res.locals.user.id === +userId // currently logged user can only get public recipes of other user
 		}) : getPublicRecipesCount({
 			currentLoggedUserId: res.locals.user.id,
