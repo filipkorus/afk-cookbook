@@ -304,10 +304,12 @@ export const getRecipesByUserIdWithAuthors = ({startIndex, limit, includePublic,
 					{userId},
 					{
 						OR: [
-							{isPublic: includePublic},
-							{isPublic: !includePrivate},
+							{isPublic: includePublic ? true : undefined},
+							{isPublic: includePrivate ? false : undefined},
+							{isPublic: !includePublic && !includePrivate ? true : undefined}
 						]
 					}
+
 				]
 			},
 			orderBy: {createdAt: 'desc'},
@@ -353,8 +355,9 @@ export const getRecipesByUserIdCount = ({includePublic, includePrivate, userId}:
 					{userId},
 					{
 						OR: [
-							{isPublic: includePublic},
-							{isPublic: !includePrivate},
+							{isPublic: includePublic ? true : undefined},
+							{isPublic: includePrivate ? false : undefined},
+							{isPublic: !includePublic && !includePrivate ? true : undefined}
 						]
 					}
 				]
@@ -621,11 +624,11 @@ export const getPublicRecipesByIngredientOrCategoryNamesList = async ({
  * @returns {Promise<number | null>} Number of recipes with given ingredients/categories or null if error.
  */
 export const getPublicRecipesByIngredientOrCategoryNamesListCount = async ({
-	                                                                      searchBy,
-	                                                                      names,
-	                                                                      currentLoggedUserId,
-	                                                                      doNotIncludeOwnRecipes
-                                                                      }: {
+	                                                                           searchBy,
+	                                                                           names,
+	                                                                           currentLoggedUserId,
+	                                                                           doNotIncludeOwnRecipes
+                                                                           }: {
 	searchBy: SearchRecipeBy,
 	names: Array<string>,
 	currentLoggedUserId: number,
