@@ -17,7 +17,7 @@ describe("GET /recipe/id", () => {
     test(`Authorized user can see public recipes by id, which contain
     author, id, title, cookingtime, description, isPublic flag, creation time,
     location, userId, categories, ingredients, and stars`, async () => {
-    const response = await supertest(app).get("/recipe/2")
+    const response = await supertest(app).get("/recipe/3")
         .set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`);
 
 

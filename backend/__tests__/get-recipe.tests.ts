@@ -145,7 +145,7 @@ describe("GET /recipe", () => {
         console.dir(response.body);
         
 
-        expect(response.status).toBe(404);
+        expect(response.status).toBe(400);
         expect(response.body.limit).toBe(25);
         expect(response.body.success).toBe(false);
     })
@@ -160,7 +160,7 @@ describe("GET /recipe", () => {
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
         
 
-        expect(response.status).toBe(404);
+        expect(response.status).toBe(400);
         expect(response.body.limit).toBe(25);
         expect(response.body.success).toBe(false);
     })
@@ -175,7 +175,7 @@ describe("GET /recipe", () => {
 
         expect(response.status).toBe(200);
         expect(response.body.limit).toBe(25);
-        expect(response.body.success).toBe(false);
+        expect(response.body.success).toBe(true);
 
         const bodyProperties = ['page', 'limit', 'totalRecipes', 'totalPages', 'recipes']
         
@@ -206,9 +206,9 @@ describe("GET /recipe", () => {
             }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)        
 
-        expect(response.status).toBe(404);
+        expect(response.status).toBe(200);
         expect(response.body.limit).toBe(25);
-        expect(response.body.success).toBe(false);
+        expect(response.body.success).toBe(true);
         
         const bodyProperties = ['page', 'limit', 'totalRecipes', 'totalPages', 'recipes']
         
@@ -222,7 +222,7 @@ describe("GET /recipe", () => {
     
         for (const recipe of response.body.recipes) {
             expect(recipe.isPublic).toBe(true);
-            expect(recipe.author.userId).toBe(!config.TEST.USER_ID)
+            expect(recipe.author.userId).not.toBe(config.TEST.USER_ID)
             
             for (const property of recipeProperties) {
                 expect(recipe).toHaveProperty(property);
