@@ -20,7 +20,7 @@ describe("GET /recipe/review/recipeid", () => {
             limit: 25
         })        
 
-        console.log(response.body);
+        
         
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
@@ -53,7 +53,7 @@ describe("GET /recipe/review/recipeid", () => {
             limit: 25
         })        
 
-        console.log(response.body);
+        
         
         expect(response.status).toBe(404);
         expect(response.body.success).toBe(false);
@@ -68,7 +68,7 @@ describe("GET /recipe/review/recipeid", () => {
             limit: 25
         })        
 
-        console.log(response.body);
+        
         
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
@@ -100,7 +100,7 @@ describe("GET /recipe/review/recipeid", () => {
             limit: 25
         })        
 
-        console.log(response.body);
+        
         
         expect(response.status).toBe(400);
         expect(response.body.success).toBe(false);
@@ -119,7 +119,7 @@ describe("GET /recipe/review/recipeid", () => {
             limit: 30
         })        
 
-        console.log(response.body);
+        
         
         expect(response.status).toBe(400);
         expect(response.body.success).toBe(false);
@@ -139,7 +139,7 @@ describe("GET /recipe/review/recipeid", () => {
             limit: 25
         })        
 
-        console.log(response.body);
+        
         
         expect(response.status).toBe(404);
         expect(response.body.success).toBe(false);

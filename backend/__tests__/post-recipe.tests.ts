@@ -34,7 +34,7 @@ describe("POST /recipe", () => {
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
         
-        console.log(response.body);
+        
         
 
 
@@ -58,7 +58,7 @@ describe("POST /recipe", () => {
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)        
         
-        console.log(response.body);
+        
         
 
 
@@ -80,7 +80,7 @@ describe("POST /recipe", () => {
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)        
         
-        console.log(response.body);
+        
         
 
 
@@ -102,7 +102,7 @@ describe("POST /recipe", () => {
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)        
         
-        console.log(response.body);
+        
         
 
 

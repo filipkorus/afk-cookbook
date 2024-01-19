@@ -125,7 +125,7 @@ describe("GET /recipe", () => {
             }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
-        console.log(response.body);
+        
         
 
         expect(response.status).toBe(400);

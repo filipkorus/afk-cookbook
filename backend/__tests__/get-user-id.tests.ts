@@ -18,7 +18,7 @@ describe("GET /user/id", () => {
         const response = await supertest(app).get("/user/1")
         .set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
-        console.log(response.body);
+        
         
 
         const userProperties = ['id', 'name', 'picture', 

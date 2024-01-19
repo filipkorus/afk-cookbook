@@ -34,7 +34,7 @@ describe("PUT /recipe", () => {
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)                
 
-        console.log(response.body);
+        
         
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
@@ -56,7 +56,7 @@ describe("PUT /recipe", () => {
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)        
         
-        console.log(response.body);
+        
         
 
 
@@ -78,7 +78,7 @@ describe("PUT /recipe", () => {
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)        
         
-        console.log(response.body);
+        
         
 
 
@@ -100,7 +100,7 @@ describe("PUT /recipe", () => {
                 }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)        
         
-        console.log(response.body);
+        
         
 
 

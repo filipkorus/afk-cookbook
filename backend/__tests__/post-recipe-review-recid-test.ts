@@ -39,7 +39,7 @@ describe("POST /recipe/review/recipeid", () => {
         })
         .set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)    
         
-        console.log(response.body);
+        
         
 
         expect(response.status).toBe(201);
@@ -72,7 +72,7 @@ describe("POST /recipe/review/recipeid", () => {
         })
         .set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)    
         
-        console.log(response.body);
+        
         
 
         expect(response.status).toBe(201);
