@@ -5,10 +5,10 @@ import {Recipe} from '@prisma/client';
 import config from '../config';
 
 
-describe("GET /recipe/category/name", () => {
+describe("GET /recipe/ingredients/nameseparatedcomma", () => {
 
     test("Unauthorized - should respond with a 401 status code", async () => {
-        const response = await supertest(app).get("/recipe/ingredients/").query(
+        const response = await supertest(app).get("/recipe/ingredients/bulka,woda").query(
                 {
                 page: 1,
                 limit: 10,
@@ -20,9 +20,8 @@ describe("GET /recipe/category/name", () => {
     })
 
     test("Authorized user able to get recipes by ingredients", async () => {
-        const response = await supertest(app).get("/recipe/ingredients/").query(
+        const response = await supertest(app).get("/recipe/ingredients/eggs,milosc").query(
                 {
-                commaSeparatedNames: "bulka,woda",
                 limit: 20,
                 page: 1
                 }
@@ -56,9 +55,9 @@ describe("GET /recipe/category/name", () => {
     })
 
     test("Authorized user enters page param as string", async () => {
-        const response = await supertest(app).get("/recipe/ingredients/").query(
+        const response = await supertest(app).get("/recipe/ingredients/bulka,woda").query(
             {page: 'xd',
-            commaSeparatedNames: "bulka,woda",}
+            }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
 
@@ -68,9 +67,9 @@ describe("GET /recipe/category/name", () => {
     })
 
     test("Authorized user enters page param as float", async () => {
-        const response = await supertest(app).get("/recipe/ingredients/").query(
+        const response = await supertest(app).get("/recipe/ingredients/bulka,woda").query(
             {page: 3.14,
-            commaSeparatedNames: "bulka,woda",}
+            }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
         expect(response.status).toBe(400);
@@ -79,15 +78,15 @@ describe("GET /recipe/category/name", () => {
     })
 
     test("Authorized user fetches recipes with nonexistent ingredients", async () => {
-        const response = await supertest(app).get("/recipe/ingredients/").query(
+        const response = await supertest(app).get("/recipe/ingredients/brick,table").query(
             { page: 1,
               limit: 25,
-              commaSeparatedNames: "bulka,woda",}
+              }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
                
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(404);
         expect(response.body.success).toBe(false);
         expect(response.body.msg).toContain("No recipes found")
     })

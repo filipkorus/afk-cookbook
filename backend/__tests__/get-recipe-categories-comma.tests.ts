@@ -19,46 +19,45 @@ describe("GET /recipe/category/name", () => {
         expect(response.body).toEqual({ success: false, msg: 'Unauthorized' });
     })
 
-    // test("Authorized user able to get recipes by categories", async () => {
-    //     const response = await supertest(app).get("/recipe/categories/").query(
-    //             {
-    //             commaSeparatedNames: "breakfast,najlepsze",
-    //             limit: 20,
-    //             page: 1
-    //             }
-    //     ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
+    test("Authorized user able to get recipes by categories", async () => {
+        const response = await supertest(app).get("/recipe/categories/Obiad,Najlepsze").query(
+                {
+                limit: 20,
+                page: 1
+                }
+        ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
 
-    //     const bodyProperties = ['page', 'limit', 'totalRecipes', 'totalPages', 'recipes']
+        const bodyProperties = ['page', 'limit', 'totalRecipes', 'totalPages', 'recipes']
         
-    //     for (const property of bodyProperties) {
-    //         expect(response.body).toHaveProperty(property);
-    //     }
+        for (const property of bodyProperties) {
+            expect(response.body).toHaveProperty(property);
+        }
 
-    //     const recipeProperties = ['author', 'id', 'title',
-    //     'cookingTimeMinutes', 'description', 'isPublic', 'createdAt', 'location',
-    //     'userId', 'categories', 'ingredients', 'stars']
+        const recipeProperties = ['author', 'id', 'title',
+        'cookingTimeMinutes', 'description', 'isPublic', 'createdAt', 'location',
+        'userId', 'categories', 'ingredients', 'stars']
     
-    //     for (const recipe of response.body.recipes) {
-    //         for (const property of recipeProperties) {
-    //             expect(recipe).toHaveProperty(property);
-    //         }
-    //     }
+        for (const recipe of response.body.recipes) {
+            for (const property of recipeProperties) {
+                expect(recipe).toHaveProperty(property);
+            }
+        }
 
-    //     
+        
         
 
-    //     expect(response.status).toBe(200);
-    //     expect(response.body.success).toBe(true);
+        expect(response.status).toBe(200);
+        expect(response.body.success).toBe(true);
 
-    //     const recipes: Recipe[] = response.body.recipes;
-    //     expect(recipes.every(recipe => recipe.isPublic === true)).toBe(true);
-    // })
+        const recipes: Recipe[] = response.body.recipes;
+        expect(recipes.every(recipe => recipe.isPublic === true)).toBe(true);
+    })
 
     test("Authorized user enters page param as string", async () => {
-        const response = await supertest(app).get("/recipe/categories/").query(
+        const response = await supertest(app).get("/recipe/categories/Obiad,Najlepsze").query(
             {page: 'xd',
-            commaSeparatedNames: "breakfast,najlepsze",}
+            }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
 
@@ -68,9 +67,9 @@ describe("GET /recipe/category/name", () => {
     })
 
     test("Authorized user enters page param as float", async () => {
-        const response = await supertest(app).get("/recipe/categories/").query(
+        const response = await supertest(app).get("/recipe/categories/Obiad,Najlepsze").query(
             {page: 3.14,
-            commaSeparatedNames: "breakfast,najlepsze",}
+            }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
         expect(response.status).toBe(400);
@@ -79,15 +78,15 @@ describe("GET /recipe/category/name", () => {
     })
 
     test("Authorized user fetches recipes with nonexistent categories", async () => {
-        const response = await supertest(app).get("/recipe/categories/").query(
+        const response = await supertest(app).get("/recipe/categories/brick,table").query(
             { page: 1,
               limit: 25,
-              commaSeparatedNames: "brick,",}
+              }
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
 
                
 
-        expect(response.status).toBe(400);
+        expect(response.status).toBe(404);
         expect(response.body.success).toBe(false);
         expect(response.body.msg).toContain("No recipes found")
     })
