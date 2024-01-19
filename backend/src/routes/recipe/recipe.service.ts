@@ -297,6 +297,9 @@ export const getRecipesByUserIdWithAuthors = ({startIndex, limit, includePublic,
 	includePrivate?: boolean,
 	userId: number,
 }) => {
+	if (!includePublic && !includePrivate) {
+		return Promise.resolve([]);
+	}
 	try {
 		return prisma.recipe.findMany({
 			where: {
@@ -304,10 +307,11 @@ export const getRecipesByUserIdWithAuthors = ({startIndex, limit, includePublic,
 					{userId},
 					{
 						OR: [
-							{isPublic: includePublic},
-							{isPublic: !includePrivate},
+							{isPublic: includePublic ? true : undefined},
+							{isPublic: includePrivate ? false : undefined}
 						]
 					}
+
 				]
 			},
 			orderBy: {createdAt: 'desc'},
@@ -346,6 +350,10 @@ export const getRecipesByUserIdCount = ({includePublic, includePrivate, userId}:
 	includePrivate?: boolean
 	userId: number,
 }): Promise<number> | null => {
+	if (!includePublic && !includePrivate) {
+		return Promise.resolve(0);
+	}
+
 	try {
 		return prisma.recipe.count({
 			where: {
@@ -353,8 +361,8 @@ export const getRecipesByUserIdCount = ({includePublic, includePrivate, userId}:
 					{userId},
 					{
 						OR: [
-							{isPublic: includePublic},
-							{isPublic: !includePrivate},
+							{isPublic: includePublic ? true : undefined},
+							{isPublic: includePrivate ? false : undefined}
 						]
 					}
 				]
@@ -621,11 +629,11 @@ export const getPublicRecipesByIngredientOrCategoryNamesList = async ({
  * @returns {Promise<number | null>} Number of recipes with given ingredients/categories or null if error.
  */
 export const getPublicRecipesByIngredientOrCategoryNamesListCount = async ({
-	                                                                      searchBy,
-	                                                                      names,
-	                                                                      currentLoggedUserId,
-	                                                                      doNotIncludeOwnRecipes
-                                                                      }: {
+	                                                                           searchBy,
+	                                                                           names,
+	                                                                           currentLoggedUserId,
+	                                                                           doNotIncludeOwnRecipes
+                                                                           }: {
 	searchBy: SearchRecipeBy,
 	names: Array<string>,
 	currentLoggedUserId: number,
