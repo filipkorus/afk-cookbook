@@ -17,11 +17,11 @@ describe("DELETE /recipe/review/reviewid", () => {
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
         .query({
             page: 1,
-            limit: 25
+            limit: 15
         })
-        
 
-        if (!checkRecipeReview.body.currentUserReview) {
+
+        if (checkRecipeReview.body?.currentUserReview.id == null) {
             const postedReview = await supertest(app).post(`/recipe/review/21`
         ).send({
             stars: 3,
@@ -34,17 +34,17 @@ describe("DELETE /recipe/review/reviewid", () => {
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
         .query({
             page: 1,
-            limit: 25
+            limit: 15
         })
+
+        console.log(getRecipeReview.body);
         
-        const reviewIdToPut = getRecipeReview.body.currentUserReview.id
         
-        const response = await supertest(app).delete(`/recipe/review/${reviewIdToPut}`
+        const reviewIdToDelete = getRecipeReview.body.currentUserReview.id
+        
+        const response = await supertest(app).delete(`/recipe/review/${reviewIdToDelete}`
         ).set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`)
-        .send({
-            stars: 5,
-            comment: 'great'
-        }) 
+        
 
         expect(response.status).toBe(200);
         expect(response.body.msg).toBe("Review deleted successfully");

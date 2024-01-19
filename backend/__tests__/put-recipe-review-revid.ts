@@ -35,8 +35,6 @@ describe("PUT /recipe/review/reviewid", () => {
             page: 1,
             limit: 25
         })
-
-        console.log(getRecipeReview);
         
         
         const reviewIdToPut = getRecipeReview.body.currentUserReview.id
