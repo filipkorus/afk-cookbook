@@ -47,25 +47,8 @@ describe("POST /recipe/review/recipeid", () => {
     })
 
     test("Authorized user cant review someone's private recipe", async () => {
-        const ReviewId = 21;
 
-        const recipeReviews = await supertest(app)
-        .get("/recipe/review/21").query({
-            page: 1
-        })
-        .set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`);
-
-        if (recipeReviews.body.currentUserReview) {
-            const reviewIdToDelete = recipeReviews.body.currentUserReview
-            .id;
-
-            const deleteReview = await supertest(app)
-        .delete(`/recipe/review/${reviewIdToDelete}`)
-        .set('Authorization', `Bearer ${config.TEST.ACCESS_TOKEN}`);
-            
-        }
-
-        const response = await supertest(app).post("/recipe/review/21"
+        const response = await supertest(app).post("/recipe/review/35"
         ).send({
             stars: 3,
             comment: 'test'
@@ -75,8 +58,8 @@ describe("POST /recipe/review/recipeid", () => {
         
         
 
-        expect(response.status).toBe(201);
-        expect(response.body.success).toBe(true);
+        expect(response.status).toBe(404);
+        expect(response.body.success).toBe(false);
     })
 
 
